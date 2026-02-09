@@ -1,1 +1,20 @@
 /* You can add global styles to this file, and also import other style files */
+/* Global color variables */
+:root {
+  --bg-dark: #22223B;
+  --form-dark: #4A4E69;
+  --border-color: #9A8C98;
+  --input-bg: #C9ADA7;
+  --text-light: #F2E9E4;
+  --accent-color: #9A8C98;
+  --error-color: #E63946;
+  --font-family: 'Arial', sans-serif;
+}
+
+html, body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  width: 100%;
+  font-family: 'Arial', sans-serif;
+}

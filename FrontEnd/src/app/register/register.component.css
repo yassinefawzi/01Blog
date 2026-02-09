@@ -1,0 +1,125 @@
+
+/* Full-page background */
+:host {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  background-color: #181c36;
+  font-family: var(--font-family);
+  color: var(--text-light);
+  padding: 2rem;
+}
+
+/* Registration container: side by side layout */
+.register-container {
+  display: flex;
+  gap: 3rem;
+  background-color: var(--bg-dark);
+  padding: 2rem;
+  border-radius: 1rem;
+  box-shadow: 0 0.5rem 2rem rgba(0, 0, 0, 0.5);
+  width: 100%;
+  max-width: 1200px;
+}
+
+/* Header column */
+.header {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  text-align: center;
+}
+
+.header .welcome h2 {
+  font-size: 1.5rem;
+  font-weight: 400;
+  color: var(--accent-color);
+}
+
+.header .welcome h1 {
+  font-size: 2.5rem;
+  font-weight: 700;
+}
+
+.header .description p {
+  font-size: 1rem;
+  line-height: 1.5;
+  color: var(--text-light);
+}
+
+/* Form column */
+.form-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.register-h2 h2 {
+  font-size: 1.75rem;
+  text-align: center;
+  color: var(--accent-color);
+  margin-bottom: 1rem;
+}
+
+/* Form layout */
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+}
+
+input {
+  padding: 0.75rem 1rem;
+  font-size: 1rem;
+  border-radius: 0.5rem;
+  border: 1px solid var(--border-color);
+  background-color: var(--text-light);
+  color: var(--bg-dark);
+  outline: none;
+  margin-bottom: 0.7rem;
+}
+
+input:focus {
+  border-color: var(--accent-color);
+  box-shadow: 0 0 0.5rem var(--accent-color);
+}
+
+/* Error messages */
+.error {
+  color: var(--error-color);
+  font-size: 0.85rem;
+}
+
+/* Button */
+button {
+  padding: 0.75rem;
+  font-size: 1rem;
+  border: none;
+  border-radius: 0.5rem;
+  background-color: var(--accent-color);
+  color: var(--text-light);
+  cursor: pointer;
+  font-weight: 600;
+  transition: background-color 0.3s;
+}
+
+/* Responsive: stack on mobile */
+@media (max-width: 800px) {
+  .register-container {
+    flex-direction: column;
+    max-width: 95%;
+    gap: 2rem;
+  }
+
+  .header, .form-content {
+    flex: unset;
+  }
+}

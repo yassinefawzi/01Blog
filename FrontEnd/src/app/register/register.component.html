@@ -1,0 +1,110 @@
+<div class="register-container">
+  <div class="header">
+    <div class="welcome">
+      <h2>Welcome to</h2>
+      <h1>01 Blog</h1>
+    </div>
+    <div class="description">
+      <p>
+        Welcome to 01Blog! Join our community of learners and creators. Share your knowledge, track
+        your progress, and connect with others on their learning journey. Register now to start
+        contributing and discovering new insights every day.
+      </p>
+    </div>
+  </div>
+  <div class="form-content">
+    <div class="register-h2">
+      <h2>register</h2>
+    </div>
+    <div class="form">
+      <form (ngSubmit)="register(form)" #form="ngForm" novalidate>
+        <div class="form-group">
+          <input
+            type="text"
+            placeholder="First Name"
+            [(ngModel)]="firstName"
+            name="firstName"
+            required
+            #firstNameInput="ngModel"
+          />
+          @if (firstNameInput.invalid && firstNameInput.touched) {
+            <div class="error">First Name is required</div>
+          }
+        </div>
+
+        <div class="form-group">
+          <input
+            type="text"
+            placeholder="Last Name"
+            [(ngModel)]="lastName"
+            name="lastName"
+            required
+            #lastNameInput="ngModel"
+          />
+          @if (lastNameInput.invalid && lastNameInput.touched) {
+            <div class="error">Last Name is required</div>
+          }
+        </div>
+
+        <div class="form-group">
+          <input
+            type="text"
+            placeholder="Username"
+            [(ngModel)]="username"
+            name="username"
+            required
+            #usernameInput="ngModel"
+          />
+          @if (usernameInput.invalid && usernameInput.touched) {
+            <div class="error">Username is required</div>
+          }
+        </div>
+
+        <div class="form-group">
+          <input
+            type="email"
+            placeholder="Email"
+            [(ngModel)]="email"
+            name="email"
+            required
+            #emailInput="ngModel"
+          />
+          @if (emailInput.invalid && emailInput.touched) {
+            <div class="error">Valid email is required</div>
+          }
+        </div>
+
+        <div class="form-group">
+          <input
+            type="password"
+            placeholder="Password"
+            [(ngModel)]="password"
+            name="password"
+            required
+            #passwordInput="ngModel"
+          />
+          @if (passwordInput.invalid && passwordInput.touched) {
+            <div class="error">Password is required</div>
+          }
+        </div>
+
+        <div class="form-group">
+          <input
+            type="text"
+            placeholder="Phone Number"
+            [(ngModel)]="phoneNumber"
+            name="phoneNumber"
+          />
+        </div>
+
+        <div class="form-group">
+          <input type="text" placeholder="City" [(ngModel)]="city" name="city" />
+        </div>
+
+        <div class="form-group">
+          <button type="submit" [disabled]="form.invalid">Submit</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
