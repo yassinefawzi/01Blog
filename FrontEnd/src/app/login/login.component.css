@@ -1,0 +1,74 @@
+:host {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  background-color: #181c36;
+  font-family: var(--font-family);
+  color: var(--text-light);
+}
+
+.logIn-container {
+  display: flex;
+  flex-direction: column;
+  padding: 5rem 0 0 0;
+}
+
+.logIn-form {
+  background-color: var(--bg-dark);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 1.5rem;
+  padding: 2rem;
+  border-radius: 1rem;
+  box-shadow: 0 0.5rem 2rem rgba(0, 0, 0, 0.5);
+  width: 30%;
+  margin: auto;
+}
+
+.logIn-form form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  width: 80%;
+  height: 100%;
+}
+
+.logIn-form form input {
+  padding: 0.75rem 1rem;
+  font-size: 1rem;
+  border-radius: 0.5rem;
+  border: 1px solid var(--border-color);
+  background-color: var(--text-light);
+  color: var(--bg -dark);
+  outline: none;
+  margin-bottom: 0.7rem;
+  width: 90%;
+}
+
+.logIn-form form label {
+  text-align: center;
+  font-weight: bold;
+  font-size: 1.25rem;
+}
+
+.logIn-form form button {
+  padding: 0.75rem;
+  font-size: 1rem;
+  border-radius: 0.5rem;
+  border: none;
+  background-color: var(--accent-color);
+  color: var(--text-light);
+  cursor: pointer;
+  font-weight: bold;
+  width: 98%;
+}
+
+footer {
+  margin-top: auto;
+  padding: 1rem;
+  text-align: center;
+  background-color: var(--bg-dark);
+  color: var(--text-light);
+}
