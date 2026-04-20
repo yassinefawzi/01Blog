@@ -1,25 +1,25 @@
 <div class="Main-class">
   <div class="nav-bar">
-      <div class="nav-left">
-        <h2 class="nav-title">01Blog</h2>
-      </div>
+    <div class="nav-left">
+      <h2 class="nav-title">01Blog</h2>
+    </div>
 
-      <div class="nav-search">
-        <div class="search-wrapper">
-          <input
-            type="text"
-            [(ngModel)]="searchQuery"
-            (keyup.enter)="onSearch()"
-            placeholder="Type in search..."
-          />
-        </div>
+    <div class="nav-search">
+      <div class="search-wrapper">
+        <input
+          type="text"
+          [(ngModel)]="searchQuery"
+          (keyup.enter)="onSearch()"
+          placeholder="Type in search..."
+        />
       </div>
+    </div>
 
-      <div class="nav-actions">
-        <button class="notification">Notifications</button>
-        <button class="create-post">Create Post</button>
-        <button class="logout-btn" (click)="logout()">Logout</button>
-      </div>
+    <div class="nav-actions">
+      <button class="notification">Notifications</button>
+      <button class="create-post">Create Post</button>
+      <button class="logout-btn" (click)="logout()">Logout</button>
+    </div>
   </div>
   <div class="main-content">
     <aside class="side-bar">
@@ -30,21 +30,24 @@
 
     <main class="posts-section">
       <div class="posts-container">
-        <div class="post">
-          <h3>Example Post Title</h3>
-          <p>This is where your learning journey content will appear...</p>
-        </div>
-        <div class="post">
-          <h3>Example Post Title</h3>
-          <p>This is where your learning journey content will appear...</p>
-        </div>
-        <div class="post">
-          <h3>Example Post Title</h3>
-          <p>This is where your learning journey content will appear...</p>
-        </div>
-        <div class="post">
-          <h3>Example Post Title</h3>
-          <p>This is where your learning journey content will appear...</p>
+        <div class="post" *ngFor="let post of posts">
+          <div class="post-header">
+            <span class="post-author">@{{ post.author }}</span>
+            <span class="post-time">{{ post.createdAt | date: 'medium' }}</span>
+          </div>
+
+          <div class="post-body">
+            <h3 class="post-title">{{ post.title }}</h3>
+            <p class="post-content">{{ post.content }}</p>
+          </div>
+
+          <div class="post-footer">
+            <div class="reactions">
+              <button class="reaction-btn like">👍 {{ post.likes }}</button>
+              <button class="reaction-btn dislike">👎 {{ post.dislikes }}</button>
+            </div>
+            <button class="comment-btn">💬 {{ post.commentCount }} Comments</button>
+          </div>
         </div>
       </div>
     </main>
