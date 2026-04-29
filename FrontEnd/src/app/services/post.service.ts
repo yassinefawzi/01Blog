@@ -11,14 +11,21 @@ export class PostService {
   constructor(private http: HttpClient) {}
 
   getPosts(): Observable<Post[]> {
-	return this.http.get<Post[]>(this.apiUrl);
+    return this.http.get<Post[]>(this.apiUrl);
   }
 
   createPost(post: Post): Observable<Post> {
-	return this.http.post<Post>(this.apiUrl, post);
+    return this.http.post<Post>(this.apiUrl, post);
   }
 
   addComment(postId: number, comment: Partial<Comment>): Observable<Comment> {
-	return this.http.post<Comment>(`${this.apiUrl}/${postId}/comments`, comment);
+    return this.http.post<Comment>(`${this.apiUrl}/${postId}/comments`, comment);
+  }
+  likePost(postId: number): Observable<Post> {
+    return this.http.put<Post>(`${this.apiUrl}/${postId}/like`, {});
+  }
+
+  dislikePost(postId: number): Observable<Post> {
+    return this.http.put<Post>(`${this.apiUrl}/${postId}/dislike`, {});
   }
 }

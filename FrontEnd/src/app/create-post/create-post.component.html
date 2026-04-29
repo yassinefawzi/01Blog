@@ -1,0 +1,39 @@
+<div class="modal-overlay" (click)="cancel()">
+  <div class="modal-content" (click)="$event.stopPropagation()">
+    
+    <div class="modal-header">
+      <h2>Create New Post</h2>
+      <button class="close-icon" (click)="cancel()">&times;</button>
+    </div>
+
+    <div class="modal-body">
+      <div class="input-group">
+        <label>Title</label>
+        <input 
+          type="text" 
+          [(ngModel)]="newPost.title" 
+          placeholder="Give your post a title..."
+          class="modal-input">
+      </div>
+
+      <div class="input-group">
+        <label>Content</label>
+        <textarea 
+          [(ngModel)]="newPost.content" 
+          placeholder="What's on your mind?" 
+          class="modal-textarea"></textarea>
+      </div>
+    </div>
+
+    <div class="modal-footer">
+      <button class="btn-secondary" (click)="cancel()">Discard</button>
+      <button 
+        class="btn-primary" 
+        (click)="submit()" 
+        [disabled]="!newPost.title || !newPost.content">
+        Publish Post
+      </button>
+    </div>
+
+  </div>
+</div>

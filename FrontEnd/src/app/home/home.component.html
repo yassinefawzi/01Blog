@@ -17,7 +17,7 @@
 
     <div class="nav-actions">
       <button class="notification">Notifications</button>
-      <button class="create-post">Create Post</button>
+      <button class="create-post" (click)="openCreatePost()">Create Post</button>
       <button class="logout-btn" (click)="logout()">Logout</button>
     </div>
   </div>
@@ -25,6 +25,7 @@
     <aside class="side-bar">
       <div class="profile-bar">My Profile</div>
       <div class="messages-bar">Messages</div>
+	  <div class="friends-bar">Friends</div>
       <div class="dark-bar">Appearance</div>
     </aside>
 
@@ -43,8 +44,8 @@
 
           <div class="post-footer">
             <div class="reactions">
-              <button class="reaction-btn like">👍 {{ post.likes }}</button>
-              <button class="reaction-btn dislike">👎 {{ post.dislikes }}</button>
+              <button class="reaction-btn like" (click)="updateLike(post.id)">👍 {{ post.likes }}</button>
+              <button class="reaction-btn dislike" (click)="updateDislike(post.id)">👎 {{ post.dislikes }}</button>
             </div>
             <button class="comment-btn">💬 {{ post.commentCount }} Comments</button>
           </div>
@@ -52,4 +53,10 @@
       </div>
     </main>
   </div>
+  <app-create-post
+    *ngIf="isCreateModalOpen"
+    (postCreated)="handlePostCreated($event)"
+    (close)="closeCreateModal()"
+  >
+  </app-create-post>
 </div>
