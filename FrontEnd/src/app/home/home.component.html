@@ -33,7 +33,8 @@
       <div class="posts-container">
         <div class="post" *ngFor="let post of posts">
           <div class="post-header">
-            <span class="post-author">@{{ post.author }}</span>
+			  <span class="post-author">@{{ post.author }}</span>
+			  <button class="delete-btn" (click)="deletePost(post.id!)">🗑️</button>
             <span class="post-time">{{ post.createdAt | date: 'medium' }}</span>
           </div>
 
@@ -96,7 +97,12 @@
 
         <div class="comments-list">
           <div class="comment-item" *ngFor="let comment of selectedPost.comments">
-            <strong>@{{ comment.author }}</strong>
+            <div class="comment-header-row">
+              <strong>@{{ comment.author }}</strong>
+              <button
+                class="delete-comment-btn"
+                (click)="deleteComment(selectedPost!.id!, comment.id!)">✕</button>
+            </div>
             <p>{{ comment.text }}</p>
             <small>{{ comment.createdAt | date: 'short' }}</small>
           </div>

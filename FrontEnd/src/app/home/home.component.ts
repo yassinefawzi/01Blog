@@ -34,16 +34,16 @@ export class HomeComponent implements OnInit {
   loadPosts() {
     this.postService.getPosts().subscribe({
       next: (data) => {
-        this.posts = data.map(post => {
-        if (post.comments) {
-          post.comments.sort((a, b) => {
-            const dateB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
-            const dateA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
-            return dateB - dateA;
-          });
-        }
-        return post;
-      });
+        this.posts = data.map((post) => {
+          if (post.comments) {
+            post.comments.sort((a, b) => {
+              const dateB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+              const dateA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+              return dateB - dateA;
+            });
+          }
+          return post;
+        });
         this.posts.sort((a, b) => {
           const dateB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
           const dateA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
@@ -161,6 +161,43 @@ export class HomeComponent implements OnInit {
           this.cdr.detectChanges();
         },
         error: (err) => console.error('Failed to add comment', err),
+      });
+    }
+  }
+
+  deletePost(postId: number) {
+    if (confirm('Are you sure you want to delete this post?')) {
+      this.postService.deletePost(postId).subscribe({
+        next: () => {
+          this.posts = this.posts.filter((p) => p.id !== postId);
+          this.cdr.detectChanges();
+        },
+        error: (err) => console.error('Delete post failed', err),
+      });
+    }
+  }
+
+  deleteComment(postId: number, commentId: number) {
+    if (confirm('Delete this comment?')) {
+      this.postService.deleteComment(postId, commentId).subscribe({
+        next: () => {
+          this.posts = this.posts.map((p) => {
+            if (p.id === postId) {
+              const updatedComments = p.comments?.filter((c) => c.id !== commentId);
+              const updatedPost = {
+                ...p,
+                comments: updatedComments,
+                commentCount: (p.commentCount || 1) - 1,
+              };
+              if (this.selectedPost?.id === postId) {
+                this.selectedPost = updatedPost;
+              }
+              return updatedPost;
+            }
+            return p;
+          });
+          this.cdr.detectChanges();
+        },
       });
     }
   }

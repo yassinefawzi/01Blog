@@ -28,4 +28,12 @@ export class PostService {
   dislikePost(postId: number): Observable<Post> {
     return this.http.put<Post>(`${this.apiUrl}/${postId}/dislike`, {});
   }
+
+  deletePost(postId: number): Observable<void> {
+    return this.http.delete<void>(`${this.apiUrl}/${postId}`);
+  }
+
+  deleteComment(postId: number, commentId: number): Observable<void> {
+    return this.http.delete<void>(`${this.apiUrl}/${postId}/comments/${commentId}`);
+  }
 }

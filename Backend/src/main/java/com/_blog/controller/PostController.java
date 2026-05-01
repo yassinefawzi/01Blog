@@ -49,10 +49,38 @@ public class PostController {
 		} else {
 			return ResponseEntity.status(401).build();
 		}
+		comment.setPost(post);
 		post.getComments().add(comment);
-		postRepository.save(post);
+		Post savedPost = postRepository.save(post);
+		Comment savedComment = savedPost.getComments().get(savedPost.getComments().size() - 1);
+		return ResponseEntity.ok(savedComment);
+	}
 
-		return ResponseEntity.ok(comment);
+	@DeleteMapping("/{postId}")
+	public ResponseEntity<?> deletePost(@PathVariable Long postId, Principal principal) {
+		Post post = postRepository.findById(postId).orElseThrow();
+		if (post.getAuthor().equals(principal.getName())) {
+			postRepository.delete(post);
+			return ResponseEntity.ok().build();
+		}
+		return ResponseEntity.status(403).build();
+	}
+
+	@DeleteMapping("/{postId}/comments/{commentId}")
+	public ResponseEntity<?> deleteComment(@PathVariable Long postId, @PathVariable Long commentId,
+			Principal principal) {
+		Post post = postRepository.findById(postId)
+				.orElseThrow(() -> new RuntimeException("Post not found"));
+		Comment commentToDelete = post.getComments().stream()
+				.filter(c -> c.getId().equals(commentId))
+				.findFirst()
+				.orElseThrow(() -> new RuntimeException("Comment not found"));
+		if (principal != null && commentToDelete.getAuthor().equals(principal.getName())) {
+			post.getComments().remove(commentToDelete);
+			postRepository.save(post);
+			return ResponseEntity.ok().build();
+		}
+		return ResponseEntity.status(403).body("You can only delete your own comments");
 	}
 
 	@PutMapping("/{postId}/like")
