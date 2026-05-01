@@ -22,6 +22,9 @@ public class Post {
 	private LocalDateTime createdAt = LocalDateTime.now();
 	private int likes = 0;
 	private int dislikes = 0;
+	@OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
+	@JoinColumn(name = "post_id")
+	private List<Comment> comments = new ArrayList<>();
 
 	public int getLikes() {
 		return likes;
@@ -41,7 +44,6 @@ public class Post {
 
 	@OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
 	@JoinColumn(name = "post_id")
-	private List<Comment> comments = new ArrayList<>();
 
 	@JsonProperty("commentCount")
 	public int getCommentCount() {

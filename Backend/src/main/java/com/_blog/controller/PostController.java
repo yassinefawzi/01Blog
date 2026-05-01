@@ -37,14 +37,22 @@ public class PostController {
 	}
 
 	@PostMapping("/{postId}/comments")
-	public Comment addComment(@PathVariable Long postId, @RequestBody Comment comment) {
+	public ResponseEntity<Comment> addComment(
+			@PathVariable Long postId,
+			@RequestBody Comment comment,
+			Principal principal) {
 		Post post = postRepository.findById(postId)
 				.orElseThrow(() -> new RuntimeException("Post not found"));
 
+		if (principal != null) {
+			comment.setAuthor(principal.getName());
+		} else {
+			return ResponseEntity.status(401).build();
+		}
 		post.getComments().add(comment);
-
 		postRepository.save(post);
-		return comment;
+
+		return ResponseEntity.ok(comment);
 	}
 
 	@PutMapping("/{postId}/like")

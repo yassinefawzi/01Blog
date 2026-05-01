@@ -2,7 +2,7 @@ import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
-import { Post } from '../models/post.model';
+import { Post, Comment } from '../models/post.model';
 import { PostService } from '../services/post.service';
 import { AuthService } from '../services/auth.service';
 import { CreatePostComponent } from '../create-post/create-post.component';
@@ -34,10 +34,21 @@ export class HomeComponent implements OnInit {
   loadPosts() {
     this.postService.getPosts().subscribe({
       next: (data) => {
-        this.posts = data;
-        this.posts.sort(
-          (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
-        );
+        this.posts = data.map(post => {
+        if (post.comments) {
+          post.comments.sort((a, b) => {
+            const dateB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+            const dateA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+            return dateB - dateA;
+          });
+        }
+        return post;
+      });
+        this.posts.sort((a, b) => {
+          const dateB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+          const dateA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+          return dateB - dateA;
+        });
         this.cdr.detectChanges();
       },
       error: (err) => {
@@ -83,31 +94,37 @@ export class HomeComponent implements OnInit {
   updateLike(postId: number) {
     this.postService.likePost(postId).subscribe({
       next: (updatedPost) => {
-        // Find the index and replace the entire post object
-        this.posts = this.posts.map((post) =>
-          post.id === postId
-            ? { ...post, likes: updatedPost.likes, dislikes: updatedPost.dislikes }
-            : post,
-        );
-
-        // Explicitly tell Angular to check for changes
+        this.posts = this.posts.map((post) => {
+          if (post.id === postId) {
+            const freshData = { ...post, likes: updatedPost.likes, dislikes: updatedPost.dislikes };
+            if (this.selectedPost?.id === postId) {
+              this.selectedPost = freshData;
+            }
+            return freshData;
+          }
+          return post;
+        });
         this.cdr.detectChanges();
       },
-      error: (err) => console.error('Error:', err),
     });
   }
 
   updateDislike(postId: number) {
     this.postService.dislikePost(postId).subscribe({
       next: (updatedPost) => {
-        this.posts = this.posts.map((post) =>
-          post.id === postId
-            ? { ...post, likes: updatedPost.likes, dislikes: updatedPost.dislikes }
-            : post,
-        );
+        this.posts = this.posts.map((post) => {
+          if (post.id === postId) {
+            const freshData = { ...post, likes: updatedPost.likes, dislikes: updatedPost.dislikes };
+            if (this.selectedPost && this.selectedPost.id === postId) {
+              this.selectedPost = freshData;
+            }
+            return freshData;
+          }
+          return post;
+        });
         this.cdr.detectChanges();
       },
-      error: (err) => console.error('Error:', err),
+      error: (err) => console.error('Error updating dislike:', err),
     });
   }
 
@@ -121,21 +138,29 @@ export class HomeComponent implements OnInit {
     document.body.style.overflow = 'auto';
   }
 
-  addComment(post: Post, event: any) {
-    const text = event.target.value.trim();
+  addComment(post: Post, input: HTMLInputElement) {
+    const text = input.value.trim();
+
     if (text && post.id) {
-      const newComment = {
-        author: this.authService.getUsername(),
-        text: text,
-      };
+      const newComment: any = { text: text };
+
       this.postService.addComment(post.id, newComment).subscribe({
-        next: (savedComment) => {
-          post.comments.push(savedComment);
-          event.target.value = '';
+        next: (savedComment: Comment) => {
+          const updatedComments = [savedComment, ...(post.comments || [])];
+          const updatedPost = {
+            ...post,
+            comments: updatedComments,
+            commentCount: (post.commentCount || 0) + 1,
+          };
+          this.posts = this.posts.map((p) => (p.id === post.id ? updatedPost : p));
+
+          if (this.selectedPost && this.selectedPost.id === post.id) {
+            this.selectedPost = updatedPost;
+          }
+          input.value = '';
+          this.cdr.detectChanges();
         },
-        error: (err) => {
-          console.error('Error adding comment:', err);
-        },
+        error: (err) => console.error('Failed to add comment', err),
       });
     }
   }

@@ -25,7 +25,7 @@
     <aside class="side-bar">
       <div class="profile-bar">My Profile</div>
       <div class="messages-bar">Messages</div>
-	  <div class="friends-bar">Friends</div>
+      <div class="friends-bar">Friends</div>
       <div class="dark-bar">Appearance</div>
     </aside>
 
@@ -43,11 +43,17 @@
           </div>
 
           <div class="post-footer">
-            <div class="reactions">
-              <button class="reaction-btn like" (click)="updateLike(post.id)">👍 {{ post.likes }}</button>
-              <button class="reaction-btn dislike" (click)="updateDislike(post.id)">👎 {{ post.dislikes }}</button>
+            <div class="reactions" *ngIf="post.id">
+              <button class="reaction-btn like" (click)="updateLike(post.id)">
+                👍 {{ post.likes }}
+              </button>
+              <button class="reaction-btn dislike" (click)="updateDislike(post.id)">
+                👎 {{ post.dislikes }}
+              </button>
             </div>
-            <button class="comment-btn">💬 {{ post.commentCount }} Comments</button>
+            <button class="comment-btn" (click)="openComments(post)">
+              💬 {{ post.commentCount }} Comments
+            </button>
           </div>
         </div>
       </div>
@@ -59,4 +65,52 @@
     (close)="closeCreateModal()"
   >
   </app-create-post>
+
+  <div class="comments-overlay" *ngIf="selectedPost" (click)="closeComments()">
+    <div class="comments-modal" (click)="$event.stopPropagation()">
+      <div class="modal-post-side">
+        <div class="post-header">
+          <span class="post-author">@{{ selectedPost.author }}</span>
+        </div>
+        <div class="post-body">
+          <h3 class="post-title">{{ selectedPost.title }}</h3>
+          <p class="post-content">{{ selectedPost.content }}</p>
+        </div>
+        <div class="post-footer">
+          <div class="reactions">
+            <button class="reaction-btn like" (click)="updateLike(selectedPost.id!)">
+              👍 {{ selectedPost.likes }}
+            </button>
+            <button class="reaction-btn dislike" (click)="updateDislike(selectedPost.id!)">
+              👎 {{ selectedPost.dislikes }}
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-comments-side">
+        <div class="comments-header">
+          <h3>Comments</h3>
+          <button class="close-modal" (click)="closeComments()">✕</button>
+        </div>
+
+        <div class="comments-list">
+          <div class="comment-item" *ngFor="let comment of selectedPost.comments">
+            <strong>@{{ comment.author }}</strong>
+            <p>{{ comment.text }}</p>
+            <small>{{ comment.createdAt | date: 'short' }}</small>
+          </div>
+        </div>
+
+        <div class="comment-input-area">
+          <input
+            #commentInput
+            type="text"
+            placeholder="Add a comment..."
+            (keyup.enter)="addComment(selectedPost!, commentInput)"
+          />
+        </div>
+      </div>
+    </div>
+  </div>
 </div>
