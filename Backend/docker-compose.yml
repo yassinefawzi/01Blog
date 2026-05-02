@@ -29,6 +29,8 @@ services:
       SPRING_DATASOURCE_URL: jdbc:mysql://mysql-db:3306/blogdb
       SPRING_DATASOURCE_USERNAME: bloguser
       SPRING_DATASOURCE_PASSWORD: blogpass
+    volumes:
+      - ./uploads:/app/uploads
 
 volumes:
   mysql-data:

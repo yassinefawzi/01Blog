@@ -20,6 +20,9 @@ export class HomeComponent implements OnInit {
   selectedPost: Post | null = null;
   isCreateModalOpen: boolean = false;
   newPost = { title: '', content: '', author: 'Current User' };
+  editingPostId: number | null = null;
+  editContent: string = '';
+  isDarkMode: boolean = false;
 
   constructor(
     private router: Router,
@@ -91,6 +94,39 @@ export class HomeComponent implements OnInit {
     }
   }
 
+  isAuthor(post: any): boolean {
+    return post.author === this.authService.getUsername();
+  }
+
+  startEdit(post: any) {
+    this.editingPostId = post.id;
+    this.editContent = post.content;
+  }
+
+  cancelEdit() {
+    this.editingPostId = null;
+    this.editContent = '';
+  }
+
+  saveEdit(post: any) {
+    if (!this.editContent.trim()) return;
+
+    this.postService
+      .updatePost(post.id, {
+        content: this.editContent,
+        category: post.category,
+      })
+      .subscribe({
+        next: (updatedPost) => {
+          post.content = updatedPost.content;
+          this.editingPostId = null;
+        },
+        error: (err) => {
+          console.error('Failed to update post:', err);
+          alert('Could not save changes.');
+        },
+      });
+  }
   updateLike(postId: number) {
     this.postService.likePost(postId).subscribe({
       next: (updatedPost) => {

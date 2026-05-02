@@ -1,18 +1,30 @@
-/* You can add global styles to this file, and also import other style files */
-/* Global color variables */
 :root {
-  --bg-dark: #22223B;
-  --form-dark: #4A4E69;
-  --post-dark: #1f2544;
-  --border-color: #9A8C98;
-  --input-bg: #C9ADA7;
-  --text-light: #F2E9E4;
-  --accent-color: #9A8C98;
-  --error-color: #E63946;
+  --bg-app: #f8f9fa;
+  --bg-card: #ffffff;
+  --nav-bg: rgba(255, 255, 255, 0.85);
+  --text-main: #2d3436;
+  --text-muted: #636e72;
+  --border: #edf2f7;
+  --accent: #6c5ce7;
+  --input-bg: #f1f3f5;
+  --shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
   --font-family: 'Arial', sans-serif;
 }
 
-html, body {
+.dark-mode {
+  --bg-app: #22223B;
+  --bg-card: #1f2544;
+  --nav-bg: #4A4E69;
+  --text-main: #F2E9E4;
+  --text-muted: #C9ADA7;
+  --border: #9A8C98;
+  --accent: #9A8C98;
+  --input-bg: #4A4E69;
+  --shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+}
+
+html,
+body {
   margin: 0;
   padding: 0;
   height: 100%;

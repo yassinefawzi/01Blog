@@ -12,6 +12,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 import java.io.IOException;
 import java.util.List;
+
 import java.util.stream.Collectors;
 
 @Component
@@ -25,10 +26,15 @@ public class JwtAuthFilter extends OncePerRequestFilter {
 
 	@Override
 	protected void doFilterInternal(HttpServletRequest request,
-			HttpServletResponse response,
-			FilterChain filterChain)
-			throws ServletException, IOException {
-
+		HttpServletResponse response,
+		FilterChain filterChain)
+		throws ServletException, IOException {
+		
+		String path = request.getServletPath();
+		if (path != null && path.startsWith("/uploads/")) {
+			filterChain.doFilter(request, response);
+			return;
+		}
 		String authHeader = request.getHeader("Authorization");
 
 		if (authHeader != null && authHeader.startsWith("Bearer ")) {

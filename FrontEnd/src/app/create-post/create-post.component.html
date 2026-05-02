@@ -15,13 +15,30 @@
           placeholder="Give your post a title..."
           class="modal-input">
       </div>
-
+      <div class="input-group">
+        <label>Category</label>
+        <select [(ngModel)]="newPost.category" class="modal-input">
+          <option value="General">General</option>
+          <option value="Tech">Tech</option>
+          <option value="Lifestyle">Lifestyle</option>
+          <option value="Art">Art</option>
+        </select>
+      </div>
       <div class="input-group">
         <label>Content</label>
         <textarea 
           [(ngModel)]="newPost.content" 
           placeholder="What's on your mind?" 
           class="modal-textarea"></textarea>
+      </div>
+      <div class="input-group">
+        <label>Add Image or Video (Max 1MB)</label>
+        <input 
+          type="file" 
+          (change)="onFileSelected($event)" 
+          accept="image/*,video/*"
+          class="modal-input-file">
+        <p *ngIf="fileError" class="error-text">{{ fileError }}</p>
       </div>
     </div>
 
@@ -30,7 +47,7 @@
       <button 
         class="btn-primary" 
         (click)="submit()" 
-        [disabled]="!newPost.title || !newPost.content">
+        [disabled]="!newPost.title || !newPost.content || !!fileError">
         Publish Post
       </button>
     </div>

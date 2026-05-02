@@ -1,120 +1,151 @@
-<div class="Main-class">
-  <div class="nav-bar">
+<div class="main-wrapper" [class.dark-mode]="isDarkMode">
+  <nav class="nav-bar">
     <div class="nav-left">
-      <h2 class="nav-title">01Blog</h2>
+      <h2 class="nav-title">01<span>Blog</span></h2>
     </div>
 
     <div class="nav-search">
-      <div class="search-wrapper">
-        <input
-          type="text"
-          [(ngModel)]="searchQuery"
-          (keyup.enter)="onSearch()"
-          placeholder="Type in search..."
-        />
+      <div class="search-group">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+        <input type="text" [(ngModel)]="searchQuery" (keyup.enter)="onSearch()" placeholder="Search stories..." />
       </div>
     </div>
 
     <div class="nav-actions">
-      <button class="notification">Notifications</button>
-      <button class="create-post" (click)="openCreatePost()">Create Post</button>
-      <button class="logout-btn" (click)="logout()">Logout</button>
+      <button class="icon-btn" title="Notifications">
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>
+      </button>
+      <button class="btn-primary" (click)="openCreatePost()">
+        <span>Create Post</span>
+      </button>
+      <button class="logout-link" (click)="logout()">Logout</button>
     </div>
-  </div>
-  <div class="main-content">
-    <aside class="side-bar">
-      <div class="profile-bar">My Profile</div>
-      <div class="messages-bar">Messages</div>
-      <div class="friends-bar">Friends</div>
-      <div class="dark-bar">Appearance</div>
+  </nav>
+
+  <div class="layout-body">
+    <aside class="side-dock">
+      <div class="dock-item" title="My Profile">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+      </div>
+      <div class="dock-item" title="Messages">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+      </div>
+      <div class="dock-item" title="Friends">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+      </div>
+      <div class="spacer"></div>
+      <div class="dock-item theme-toggle" (click)="isDarkMode = !isDarkMode" [title]="isDarkMode ? 'Light Mode' : 'Dark Mode'">
+        <svg *ngIf="!isDarkMode" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>
+        <svg *ngIf="isDarkMode" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
+      </div>
     </aside>
 
-    <main class="posts-section">
-      <div class="posts-container">
-        <div class="post" *ngFor="let post of posts">
-          <div class="post-header">
-			  <span class="post-author">@{{ post.author }}</span>
-			  <button class="delete-btn" (click)="deletePost(post.id!)">🗑️</button>
-            <span class="post-time">{{ post.createdAt | date: 'medium' }}</span>
+    <main class="feed-container">
+      <div class="card post-card" *ngFor="let post of posts">
+            <div class="post-header-row">
+          <div class="user-meta">
+            <div class="avatar-placeholder">{{ post.author[0] | uppercase }}</div>
+            <span class="author-name">@{{ post.author }}</span>
           </div>
-
-          <div class="post-body">
-            <h3 class="post-title">{{ post.title }}</h3>
-            <p class="post-content">{{ post.content }}</p>
-          </div>
-
-          <div class="post-footer">
-            <div class="reactions" *ngIf="post.id">
-              <button class="reaction-btn like" (click)="updateLike(post.id)">
-                👍 {{ post.likes }}
-              </button>
-              <button class="reaction-btn dislike" (click)="updateDislike(post.id)">
-                👎 {{ post.dislikes }}
-              </button>
-            </div>
-            <button class="comment-btn" (click)="openComments(post)">
-              💬 {{ post.commentCount }} Comments
+          <div class="post-actions" *ngIf="isAuthor(post)">
+            <button (click)="startEdit(post)" class="icon-btn-sm" title="Edit">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 1 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+            </button>
+            <button (click)="deletePost(post.id!)" class="icon-btn-sm delete" title="Delete">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
             </button>
           </div>
+        </div>
+        <div class="post-body-column">
+          <h3 class="post-title">{{ post.title }}</h3>
+          
+          <div class="media-wrapper" *ngIf="post.mediaUrl">
+            <img *ngIf="post.mediaType === 'IMAGE'" [src]="'http://localhost:8080' + post.mediaUrl" alt="post media">
+            <video *ngIf="post.mediaType === 'VIDEO'" controls>
+              <source [src]="'http://localhost:8080' + post.mediaUrl" type="video/mp4">
+            </video>
+          </div>
+
+          <div *ngIf="editingPostId !== post.id; else editMode">
+            <p class="post-text">{{ post.content }}</p>
+          </div>
+
+          <ng-template #editMode>
+            <div class="edit-container">
+              <textarea [(ngModel)]="editContent" class="modern-textarea"></textarea>
+              <div class="edit-actions">
+                <button class="btn-save" (click)="saveEdit(post)">Save</button>
+                <button class="btn-ghost" (click)="cancelEdit()">Cancel</button>
+              </div>
+            </div>
+          </ng-template>
+        </div>
+        <div class="post-stats-row">
+          <div class="interaction-group">
+            <button (click)="updateLike(post.id!)" class="stat-pill like">
+              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"></path></svg>
+              <span>{{ post.likes }}</span>
+            </button>
+            <button (click)="updateDislike(post.id!)" class="stat-pill dislike">
+              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 15v4a3 3 0 0 0 3 3l4-9V2H5.72a2 2 0 0 0-2 1.7l-1.38 9a2 2 0 0 0 2 2.3zM17 2h3a2 2 0 0 1 2 2v7a2 2 0 0 1-2 2h-3"></path></svg>
+              <span>{{ post.dislikes }}</span>
+            </button>
+            <button (click)="openComments(post)" class="stat-pill comment">
+              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path></svg>
+              <span>{{ post.commentCount }}</span>
+            </button>
+          </div>
+        </div>
+        <div class="post-footer-date">
+          {{ post.createdAt | date: 'fullDate' }} at {{ post.createdAt | date: 'shortTime' }}
         </div>
       </div>
     </main>
   </div>
+
   <app-create-post
     *ngIf="isCreateModalOpen"
     (postCreated)="handlePostCreated($event)"
     (close)="closeCreateModal()"
-  >
-  </app-create-post>
+  ></app-create-post>
 
-  <div class="comments-overlay" *ngIf="selectedPost" (click)="closeComments()">
-    <div class="comments-modal" (click)="$event.stopPropagation()">
-      <div class="modal-post-side">
-        <div class="post-header">
-          <span class="post-author">@{{ selectedPost.author }}</span>
-        </div>
-        <div class="post-body">
-          <h3 class="post-title">{{ selectedPost.title }}</h3>
-          <p class="post-content">{{ selectedPost.content }}</p>
-        </div>
-        <div class="post-footer">
-          <div class="reactions">
-            <button class="reaction-btn like" (click)="updateLike(selectedPost.id!)">
-              👍 {{ selectedPost.likes }}
-            </button>
-            <button class="reaction-btn dislike" (click)="updateDislike(selectedPost.id!)">
-              👎 {{ selectedPost.dislikes }}
-            </button>
+  <div class="modal-overlay" *ngIf="selectedPost" (click)="closeComments()">
+    <div class="glass-modal" (click)="$event.stopPropagation()">
+      <div class="modal-preview">
+        <div class="post-header-row">
+          <div class="user-meta">
+            <div class="avatar-placeholder">{{ selectedPost.author[0] | uppercase }}</div>
+            <span class="author-name">@{{ selectedPost.author }}</span>
           </div>
+        </div>
+        <div class="modal-scroll-content">
+          <h3 class="post-title">{{ selectedPost.title }}</h3>
+          <div class="media-wrapper" *ngIf="selectedPost.mediaUrl">
+            <img [src]="'http://localhost:8080' + selectedPost.mediaUrl" class="responsive-media">
+          </div>
+          <p class="post-text">{{ selectedPost.content }}</p>
         </div>
       </div>
 
-      <div class="modal-comments-side">
-        <div class="comments-header">
+      <div class="modal-thread">
+        <div class="thread-header">
           <h3>Comments</h3>
-          <button class="close-modal" (click)="closeComments()">✕</button>
+          <button class="icon-btn-sm" (click)="closeComments()">✕</button>
         </div>
 
-        <div class="comments-list">
-          <div class="comment-item" *ngFor="let comment of selectedPost.comments">
-            <div class="comment-header-row">
+        <div class="comments-scroll">
+          <div class="comment-bubble" *ngFor="let comment of selectedPost.comments">
+            <div class="comment-meta">
               <strong>@{{ comment.author }}</strong>
-              <button
-                class="delete-comment-btn"
-                (click)="deleteComment(selectedPost!.id!, comment.id!)">✕</button>
+              <button class="delete-link" (click)="deleteComment(selectedPost!.id!, comment.id!)">Delete</button>
             </div>
             <p>{{ comment.text }}</p>
-            <small>{{ comment.createdAt | date: 'short' }}</small>
+            <span class="comment-date">{{ comment.createdAt | date: 'short' }}</span>
           </div>
         </div>
 
-        <div class="comment-input-area">
-          <input
-            #commentInput
-            type="text"
-            placeholder="Add a comment..."
-            (keyup.enter)="addComment(selectedPost!, commentInput)"
-          />
+        <div class="thread-input">
+          <input #commentInput type="text" placeholder="Write a comment..." (keyup.enter)="addComment(selectedPost!, commentInput)" />
         </div>
       </div>
     </div>

@@ -105,3 +105,22 @@
 .btn-secondary:hover {
   background-color: #e2e6ea;
 }
+
+.modal-input-file {
+  width: 100%;
+  padding: 8px 0;
+  font-size: 0.9rem;
+  color: #666;
+}
+
+.error-text {
+  color: #e74c3c;
+  font-size: 0.8rem;
+  margin-top: 4px;
+  font-weight: 500;
+}
+
+select.modal-input {
+  cursor: pointer;
+  background-color: white;
+}

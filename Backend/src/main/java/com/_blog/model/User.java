@@ -1,8 +1,7 @@
 package com._blog.model;
 
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.Data;
 import java.util.HashSet;
 import java.util.Set;
 import jakarta.validation.constraints.Pattern;
@@ -10,8 +9,7 @@ import jakarta.validation.constraints.Size;
 
 @Entity
 @Table(name = "users")
-@Getter
-@Setter
+@Data
 
 public class User {
 	@Id

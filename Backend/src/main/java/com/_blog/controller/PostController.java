@@ -10,6 +10,14 @@ import com._blog.repository.VoteRepository;
 import com._blog.repository.UserRepository;
 import com._blog.model.User;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.security.Principal;
 import java.util.List;
 import java.util.Optional;
@@ -31,9 +39,25 @@ public class PostController {
 		return postRepository.findAll();
 	}
 
-	@PostMapping
-	public Post createPost(@RequestBody Post post) {
-		return postRepository.save(post);
+	@PostMapping(consumes = { "multipart/form-data" })
+	public ResponseEntity<?> createPost(
+			@RequestPart("post") Post post,
+			@RequestPart(value = "file", required = false) MultipartFile file,
+			Principal principal) {
+		if (principal != null) {
+			post.setAuthor(principal.getName());
+		}
+		if (file != null && !file.isEmpty()) {
+			try {
+				String fileName = saveFile(file);
+				post.setMediaUrl("/uploads/" + fileName);
+				String contentType = file.getContentType();
+				post.setMediaType(contentType != null && contentType.startsWith("video") ? "VIDEO" : "IMAGE");
+			} catch (IOException e) {
+				return ResponseEntity.internalServerError().body("Could not save file.");
+			}
+		}
+		return ResponseEntity.ok(postRepository.save(post));
 	}
 
 	@PostMapping("/{postId}/comments")
@@ -58,12 +82,28 @@ public class PostController {
 
 	@DeleteMapping("/{postId}")
 	public ResponseEntity<?> deletePost(@PathVariable Long postId, Principal principal) {
-		Post post = postRepository.findById(postId).orElseThrow();
+		Post post = postRepository.findById(postId).orElseThrow(() -> new RuntimeException("Post not found"));
 		if (post.getAuthor().equals(principal.getName())) {
+			if (post.getMediaUrl() != null) {
+				deleteFile(post.getMediaUrl());
+			}
 			postRepository.delete(post);
 			return ResponseEntity.ok().build();
 		}
+
 		return ResponseEntity.status(403).build();
+	}
+
+	private void deleteFile(String mediaUrl) {
+		try {
+			String relativePath = mediaUrl.startsWith("/") ? mediaUrl.substring(1) : mediaUrl;
+			Path filePath = Paths.get(relativePath);
+
+			Files.deleteIfExists(filePath);
+			System.out.println("Successfully deleted file: " + filePath);
+		} catch (IOException e) {
+			System.err.println("Failed to delete file: " + e.getMessage());
+		}
 	}
 
 	@DeleteMapping("/{postId}/comments/{commentId}")
@@ -138,6 +178,20 @@ public class PostController {
 		return ResponseEntity.ok(postRepository.save(post));
 	}
 
+	@PutMapping("/{postId}")
+	public ResponseEntity<?> updatePost(
+			@PathVariable Long postId,
+			@RequestBody Post postDetails,
+			Principal principal) {
+		Post post = postRepository.findById(postId).orElseThrow(() -> new RuntimeException("Post not found"));
+		if (principal == null || !post.getAuthor().equals(principal.getName())) {
+			return ResponseEntity.status(403).body("You are not authorized to edit this post.");
+		}
+		post.setContent(postDetails.getContent());
+		post.setCategory(postDetails.getCategory());
+		return ResponseEntity.ok(postRepository.save(post));
+	}
+
 	private Long getUserIdFromPrincipal(Principal principal) {
 		if (principal == null) {
 			throw new RuntimeException("Not authenticated");
@@ -146,5 +200,18 @@ public class PostController {
 		return userRepository.findByUsername(emailOrUsername)
 				.map(User::getId)
 				.orElseThrow(() -> new RuntimeException("User not found"));
+	}
+
+	private String saveFile(MultipartFile file) throws IOException {
+		String fileName = System.currentTimeMillis() + "_" + file.getOriginalFilename();
+		Path uploadPath = Paths.get("uploads");
+		if (!Files.exists(uploadPath)) {
+			Files.createDirectories(uploadPath);
+		}
+		try (InputStream inputStream = file.getInputStream()) {
+			Path filePath = uploadPath.resolve(fileName);
+			Files.copy(inputStream, filePath, StandardCopyOption.REPLACE_EXISTING);
+		}
+		return fileName;
 	}
 }

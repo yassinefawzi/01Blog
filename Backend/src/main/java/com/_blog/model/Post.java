@@ -17,33 +17,18 @@ public class Post {
 	private Long id;
 	private String author;
 	private String title;
+
 	@Column(columnDefinition = "TEXT")
 	private String content;
+
 	private LocalDateTime createdAt = LocalDateTime.now();
 	private int likes = 0;
 	private int dislikes = 0;
-	@OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
-	@JoinColumn(name = "post_id")
+	@OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
 	private List<Comment> comments = new ArrayList<>();
-
-	public int getLikes() {
-		return likes;
-	}
-
-	public void setLikes(int likes) {
-		this.likes = likes;
-	}
-
-	public int getDislikes() {
-		return dislikes;
-	}
-
-	public void setDislikes(int dislikes) {
-		this.dislikes = dislikes;
-	}
-
-	@OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
-	@JoinColumn(name = "post_id")
+	private String category;
+	private String mediaUrl;
+	private String mediaType;
 
 	@JsonProperty("commentCount")
 	public int getCommentCount() {

@@ -14,19 +14,41 @@ import { AuthService } from '../services/auth.service';
 export class CreatePostComponent {
   @Output() postCreated = new EventEmitter<any>();
   @Output() close = new EventEmitter<void>();
+  newPost = { 
+    title: '', 
+    content: '', 
+    author: '', 
+    category: 'General' 
+  };
 
-  newPost = { title: '', content: '', author: '' };
+  selectedFile: File | null = null;
+  fileError: string = '';
 
   constructor(
     private postService: PostService,
     private authService: AuthService,
   ) {}
+  onFileSelected(event: any) {
+    const file = event.target.files[0];
+    if (file) {
+      if (file.size > 1048576) {
+        this.fileError = 'File is too large (max 1MB)';
+        this.selectedFile = null;
+      } else {
+        this.fileError = '';
+        this.selectedFile = file;
+      }
+    }
+  }
 
   submit() {
-    this.newPost.author = this.authService.getUsername();
-
-    if (this.newPost.title.trim() && this.newPost.content.trim()) {
-      this.postService.createPost(this.newPost as any).subscribe({
+	if (!this.authService.isLoggedIn()) {
+	  alert('You must be logged in to create a post.');
+	  return;
+	}
+    this.newPost.author = this.authService.getUsername() || 'Unknown User';
+    if (this.newPost.title.trim() && this.newPost.content.trim() && !this.fileError) {
+      this.postService.createPost(this.newPost as any, this.selectedFile || undefined).subscribe({
         next: (savedPost) => {
           this.postCreated.emit(savedPost);
           this.close.emit();
@@ -36,6 +58,8 @@ export class CreatePostComponent {
           if (err.status === 401 || err.status === 403) {
             alert('Session expired. Please login again.');
             this.authService.logout();
+          } else if (err.status === 413) {
+            alert('File is too large for the server.');
           } else {
             alert('An unexpected error occurred. Please try again.');
           }

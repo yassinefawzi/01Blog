@@ -1,4 +1,5 @@
-import { Injectable } from '@angular/core';
+import { Injectable, PLATFORM_ID, Inject } from '@angular/core';
+import { isPlatformBrowser } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { Observable, tap } from 'rxjs';
@@ -13,6 +14,7 @@ export class AuthService {
   constructor(
     private http: HttpClient,
     private router: Router,
+    @Inject(PLATFORM_ID) private platformId: Object,
   ) {}
   register(userData: any): Observable<any> {
     return this.http.post(`${this.userUrl}/register`, userData);
@@ -22,7 +24,7 @@ export class AuthService {
       tap((response) => {
         if (response && response.token) {
           localStorage.setItem('token', response.token);
-          console.log('Token saved to LocalStorage');
+          localStorage.setItem('username', response.username);
         }
       }),
     );
@@ -41,16 +43,20 @@ export class AuthService {
     }
   }
 
-  getUsername(): string {
-    const token = localStorage.getItem('token');
-
-    if (!token) {
-      throw new Error('No token found! User must be logged in.');
+  getUsername(): string | null {
+    if (!isPlatformBrowser(this.platformId)) {
+      return null;
     }
 
-    const payload = JSON.parse(atob(token.split('.')[1]));
-    return payload.sub;
+    const token = localStorage.getItem('token');
+    if (!token) {
+      console.warn('No token found, logging out...');
+      this.logout();
+      return null;
+    }
+    return localStorage.getItem('username');
   }
+
   isLoggedIn(): boolean {
     return !!localStorage.getItem('token');
   }
