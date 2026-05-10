@@ -1,13 +1,15 @@
+import { User } from './user.model';
+
 export interface Comment {
   id?: number;
-  author: string;
+  author: User;
   text: string;
   createdAt?: Date;
 }
 
 export interface Post {
   id?: number;
-  author: string;
+  author: User
   title: string;
   category?: string;
   mediaUrl?: string;

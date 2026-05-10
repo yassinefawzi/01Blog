@@ -28,4 +28,15 @@ public class WebConfig implements WebMvcConfigurer {
 		registry.addResourceHandler("/uploads/**")
 				.addResourceLocations("file:uploads/");
 	}
+
+	@Configuration
+	public class WebConfig implements WebMvcConfigurer {
+		@Override
+		public void addViewControllers(ViewControllerRegistry registry) {
+			registry.addViewController("/{path:[^\\.]*}")
+					.setViewName("forward:/index.html");
+			registry.addViewController("/{path:^(?!api$).*$}/**/{path:[^\\.]*}")
+					.setViewName("forward:/index.html");
+		}
+	}
 }

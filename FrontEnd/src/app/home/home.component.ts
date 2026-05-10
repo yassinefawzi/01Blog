@@ -31,7 +31,7 @@ export class HomeComponent implements OnInit {
     private cdr: ChangeDetectorRef,
   ) {}
   ngOnInit(): void {
-    this.loadPosts();
+    this.fetchPosts();
   }
 
   onPostAdded(newPost: Post) {
@@ -43,10 +43,11 @@ export class HomeComponent implements OnInit {
     console.log('Filtering by:', category);
   }
 
-  loadPosts() {
-    this.postService.getPosts().subscribe({
+  fetchPosts() {
+    this.postService.getSocialFeed().subscribe({
       next: (data) => {
         this.posts = data.map((post) => {
+          // Sort comments newest first
           if (post.comments) {
             post.comments.sort((a, b) => {
               const dateB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
@@ -56,21 +57,24 @@ export class HomeComponent implements OnInit {
           }
           return post;
         });
+
         this.posts.sort((a, b) => {
           const dateB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
           const dateA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
           return dateB - dateA;
         });
+
         this.cdr.detectChanges();
       },
       error: (err) => {
-        console.error('Error fetching posts:', err);
+        console.error('Error fetching social feed:', err);
       },
     });
   }
 
-  isAuthor(post: any): boolean {
-    return post.author === this.authService.getUsername();
+  isAuthor(post: Post): boolean {
+    const currentUsername = this.authService.getUsername();
+    return post.author?.username === currentUsername;
   }
 
   startEdit(post: any) {

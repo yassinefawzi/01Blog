@@ -9,15 +9,16 @@ export class UserService {
   private http = inject(HttpClient);
   private apiUrl = 'http://localhost:8080/api/users';
 
-  getProfile(username: string): Observable<any> {
-    return this.http.get(`${this.apiUrl}/profile/${username}`, { withCredentials: true });
+  getUserProfile(username: string): Observable<any> {
+    return this.http.get(`http://localhost:8080/api/users/profile/${username}`, {
+      withCredentials: true,
+    });
   }
 
-  toggleFollow(targetUsername: string, currentUsername: string): Observable<any> {
-    return this.http.post(
-      `${this.apiUrl}/follow/${targetUsername}?currentUsername=${currentUsername}`,
-      {},
-      { withCredentials: true },
-    );
+  toggleFollow(targetUsername: string): Observable<any> {
+    return this.http.post(`${this.apiUrl}/follow/${targetUsername}`, {}, { withCredentials: true });
+  }
+  getProfile(username: string): Observable<any> {
+    return this.http.get<any>(`${this.apiUrl}/profile/${username}`, { withCredentials: true });
   }
 }

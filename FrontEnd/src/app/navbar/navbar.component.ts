@@ -19,7 +19,7 @@ export class NavbarComponent {
   private postService = inject(PostService);
 
   isCreateModalOpen: boolean = false;
-  newPost = { title: '', content: '', author: 'Current User' };
+  newPost = { title: '', content: '' };
   searchQuery: string = '';
   user$ = this.authService.currentUser$;
 
@@ -53,7 +53,7 @@ export class NavbarComponent {
 
   closeCreatePost() {
     this.isCreateModalOpen = false;
-    this.newPost = { title: '', content: '', author: 'Current User' };
+    this.newPost = { title: '', content: '' };
     document.body.style.overflow = 'auto';
   }
 
@@ -63,14 +63,14 @@ export class NavbarComponent {
   }
 
   submitPost() {
-    if (this.newPost.title.trim() && this.newPost.content.trim()) {
-      this.postService.createPost(this.newPost as Post).subscribe({
-        next: (savedPost) => {
-          this.posts.unshift(savedPost);
-          this.closeCreatePost();
-        },
-        error: (err) => console.error('Could not save post', err),
-      });
-    }
+  if (this.newPost.title.trim() && this.newPost.content.trim()) {
+    this.postService.createPost(this.newPost as any).subscribe({
+      next: (savedPost: Post) => {
+        this.postAdded.emit(savedPost);
+        this.closeCreatePost();
+      },
+      error: (err: any) => console.error('Could not save post', err),
+    });
   }
+}
 }

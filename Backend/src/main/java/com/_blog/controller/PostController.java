@@ -19,8 +19,10 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.security.Principal;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 @RestController
 @RequestMapping("/api/posts")
@@ -220,5 +222,20 @@ public class PostController {
 			Files.copy(inputStream, filePath, StandardCopyOption.REPLACE_EXISTING);
 		}
 		return fileName;
+	}
+
+	@GetMapping("/feed")
+	public ResponseEntity<List<Post>> getSocialFeed(Principal principal) {
+		if (principal == null)
+			return ResponseEntity.status(401).build();
+
+		User currentUser = userRepository.findByUsername(principal.getName())
+				.orElseThrow(() -> new RuntimeException("User not found"));
+
+		Set<User> feedAuthors = new HashSet<>(currentUser.getFollowing());
+		feedAuthors.add(currentUser);
+		List<Post> feed = postRepository.findByAuthorInOrderByCreatedAtDesc(feedAuthors);
+
+		return ResponseEntity.ok(feed);
 	}
 }

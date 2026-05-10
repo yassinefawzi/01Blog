@@ -11,8 +11,8 @@
       <div class="card post-card" *ngFor="let post of posts">
         <div class="post-header-row">
           <div class="user-meta">
-            <div class="avatar-placeholder">{{ post.author[0] | uppercase }}</div>
-            <span class="author-name">@{{ post.author }}</span>
+            <div class="avatar-placeholder">{{ post.author.username[0] | uppercase }}</div>
+            <span class="author-name">@{{ post.author.username }}</span>
           </div>
           <div class="post-actions" *ngIf="isAuthor(post)">
             <button (click)="startEdit(post)" class="icon-btn-sm" title="Edit">
@@ -56,9 +56,11 @@
               [src]="'http://localhost:8080' + post.mediaUrl"
               alt="post media"
             />
-            <video *ngIf="post.mediaType === 'VIDEO'" controls>
-              <source [src]="'http://localhost:8080' + post.mediaUrl" type="video/mp4" />
-            </video>
+            <video
+              *ngIf="post.mediaType === 'VIDEO'"
+              controls
+              [src]="'http://localhost:8080' + post.mediaUrl"
+            ></video>
           </div>
 
           <div *ngIf="editingPostId !== post.id; else editMode">
@@ -139,8 +141,8 @@
       <div class="modal-preview">
         <div class="post-header-row">
           <div class="user-meta">
-            <div class="avatar-placeholder">{{ selectedPost.author[0] | uppercase }}</div>
-            <span class="author-name">@{{ selectedPost.author }}</span>
+            <div class="avatar-placeholder">{{ selectedPost.author.username[0] | uppercase }}</div>
+            <span class="author-name">@{{ selectedPost.author.username }}</span>
           </div>
         </div>
         <div class="modal-scroll-content">
@@ -161,7 +163,7 @@
         <div class="comments-scroll">
           <div class="comment-bubble" *ngFor="let comment of selectedPost.comments">
             <div class="comment-meta">
-              <strong>@{{ comment.author }}</strong>
+              <strong>@{{ comment.author.username }}</strong>
               <button class="delete-link" (click)="deleteComment(selectedPost!.id!, comment.id!)">
                 Delete
               </button>

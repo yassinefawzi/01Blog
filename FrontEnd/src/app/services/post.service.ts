@@ -46,4 +46,8 @@ export class PostService {
   dislikePost(postId: number): Observable<Post> {
     return this.http.put<Post>(`${this.apiUrl}/${postId}/dislike`, {});
   }
+
+  getSocialFeed(): Observable<Post[]> {
+    return this.http.get<Post[]>(`${this.apiUrl}/feed`, { withCredentials: true });
+  }
 }
