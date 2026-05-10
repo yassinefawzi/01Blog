@@ -1,0 +1,45 @@
+<div class="profile-page-wrapper" *ngIf="user">
+  <div class="profile-sidebar">
+    <div class="profile-card">
+      <div class="avatar-circle">
+        {{ user.username?.charAt(0).toUpperCase() }}
+      </div>
+      <h1 class="username">@{{ user.username }}</h1>
+
+      <button class="follow-btn" [class.following]="isFollowing" (click)="toggleFollow()">
+        {{ isFollowing ? 'Following' : 'Follow' }}
+      </button>
+
+      <div class="stats-bar">
+        <div class="stat-item">
+          <span class="count">{{ postCount }}</span>
+          <span class="label">Posts</span>
+        </div>
+        <div class="stat-item">
+          <span class="count">{{ followersCount }}</span>
+          <span class="label">Followers</span>
+        </div>
+        <div class="stat-item">
+          <span class="count">{{ followingCount }}</span>
+          <span class="label">Following</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="posts-feed">
+    <h3>Recent Posts</h3>
+    <div class="post-card" *ngFor="let post of userPosts">
+      <div class="post-header">
+        <h4>{{ post.title }}</h4>
+        <span class="post-date">{{ post.date | date: 'mediumDate' }}</span>
+      </div>
+      <p>{{ post.excerpt }}</p>
+      <a class="read-more">Read more →</a>
+    </div>
+
+    <div class="empty-state" *ngIf="userPosts.length === 0">
+      <p>No posts created yet.</p>
+    </div>
+  </div>
+</div>

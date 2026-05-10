@@ -7,31 +7,45 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @Entity
 @Data
 @NoArgsConstructor
 public class Post {
-	@Id
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	private Long id;
-	private String author;
-	private String title;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
-	@Column(columnDefinition = "TEXT")
-	private String content;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", nullable = false)
+    @JsonIgnoreProperties({"posts", "password", "email", "followers", "following"})
+    private User author;
 
-	private LocalDateTime createdAt = LocalDateTime.now();
-	private int likes = 0;
-	private int dislikes = 0;
-	@OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
-	private List<Comment> comments = new ArrayList<>();
-	private String category;
-	private String mediaUrl;
-	private String mediaType;
+    private String title;
 
-	@JsonProperty("commentCount")
-	public int getCommentCount() {
-		return this.comments != null ? this.comments.size() : 0;
-	}
+    @Column(columnDefinition = "TEXT")
+    private String content;
+
+    private LocalDateTime createdAt = LocalDateTime.now();
+    
+    private int likes = 0;
+    private int dislikes = 0;
+
+    @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Comment> comments = new ArrayList<>();
+
+    private String category;
+    private String mediaUrl;
+    private String mediaType;
+
+    @JsonProperty("commentCount")
+    public int getCommentCount() {
+        return this.comments != null ? this.comments.size() : 0;
+    }
+
+    @JsonProperty("authorName")
+    public String getAuthorName() {
+        return author != null ? author.getUsername() : null;
+    }
 }

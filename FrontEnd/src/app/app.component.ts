@@ -1,13 +1,18 @@
 import { Component } from '@angular/core';
-import { register } from 'module';
 import { RegisterComponent } from './register/register.component';
+import { AuthService } from './services/auth.service';
+import { RouterModule } from '@angular/router';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [RegisterComponent],
-  template: `
-    <app-register></app-register>
-  `
+  imports: [RouterModule],
+  template: `<router-outlet></router-outlet>`,
 })
-export class AppComponent {}
+export class AppComponent {
+  constructor(private authService: AuthService) {}
+
+  ngOnInit() {
+    this.authService.checkSession().subscribe();
+  }
+}

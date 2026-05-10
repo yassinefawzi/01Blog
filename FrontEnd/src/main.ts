@@ -1,6 +1,8 @@
 import { bootstrapApplication } from '@angular/platform-browser';
 import { appConfig } from './app/app.config';
-import { App } from './app/app';
+import { AppComponent } from './app/app.component'; // Make sure this points to your app.component.ts
 
-bootstrapApplication(App, appConfig)
-  .catch((err) => console.error(err));
+console.log('Main.ts is executing...'); // Add this to verify the file runs
+
+bootstrapApplication(AppComponent, appConfig) // This MUST be AppComponent
+  .catch((err) => console.error('Bootstrap failed:', err));

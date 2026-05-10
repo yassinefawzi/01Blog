@@ -12,6 +12,7 @@ import { AuthService } from '../services/auth.service';
   styleUrls: ['./create-post.component.css'],
 })
 export class CreatePostComponent {
+	
   @Output() postCreated = new EventEmitter<any>();
   @Output() close = new EventEmitter<void>();
   newPost = { 

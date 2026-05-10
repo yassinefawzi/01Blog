@@ -1,23 +1,31 @@
 package com._blog.controller;
 
 import com._blog.dto.RegisterRequest;
+import com._blog.dto.UserProfileDTO;
 import com._blog.model.User;
+import com._blog.repository.PostRepository;
+import com._blog.repository.UserRepository;
 import com._blog.service.UserService;
 import jakarta.validation.Valid;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
 
-import org.springframework.http.HttpStatus;
-
 @RestController
 @RequestMapping("/api/users")
+@CrossOrigin(origins = "http://localhost:4200", allowCredentials = "true")
 public class UserController {
 	private final UserService userService;
+	private final UserRepository userRepository;
+	private final PostRepository postRepository;
 
-	public UserController(UserService userService) {
+	public UserController(UserService userService, UserRepository userRepository, PostRepository postRepository) {
 		this.userService = userService;
+		this.userRepository = userRepository;
+		this.postRepository = postRepository;
 	}
 
 	@PostMapping("/register")
@@ -33,5 +41,41 @@ public class UserController {
 
 		userService.registerUser(user);
 		return new ResponseEntity<>(Map.of("message", "registration successful."), HttpStatus.CREATED);
+	}
+
+	@GetMapping("/profile/{username}")
+	public ResponseEntity<?> getUserProfile(@PathVariable String username) {
+		return userRepository.findByUsername(username)
+				.map(user -> {
+					UserProfileDTO profile = UserProfileDTO.builder()
+							.username(user.getUsername())
+							.firstName(user.getFirstName())
+							.lastName(user.getLastName())
+							.postCount(postRepository.countByAuthorUsername(username))
+							.followersCount(user.getFollowers().size())
+							.followingCount(user.getFollowing().size())
+							.posts(postRepository.findByAuthorUsernameOrderByCreatedAtDesc(username))
+							.build();
+					return ResponseEntity.ok(profile);
+				})
+				.orElse(ResponseEntity.notFound().build());
+	}
+
+	@PostMapping("/follow/{username}")
+	public ResponseEntity<?> toggleFollow(@PathVariable String username, @RequestParam String currentUsername) {
+		User currentUser = userRepository.findByUsername(currentUsername)
+				.orElseThrow(() -> new RuntimeException("Current user not found"));
+		User targetUser = userRepository.findByUsername(username)
+				.orElseThrow(() -> new RuntimeException("Target user not found"));
+
+		if (currentUser.getFollowing().contains(targetUser)) {
+			currentUser.getFollowing().remove(targetUser);
+			userRepository.save(currentUser);
+			return ResponseEntity.ok(Map.of("status", "unfollowed"));
+		} else {
+			currentUser.getFollowing().add(targetUser);
+			userRepository.save(currentUser);
+			return ResponseEntity.ok(Map.of("status", "followed"));
+		}
 	}
 }

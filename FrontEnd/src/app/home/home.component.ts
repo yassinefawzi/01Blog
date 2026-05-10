@@ -1,29 +1,29 @@
-import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { Post, Comment } from '../models/post.model';
 import { PostService } from '../services/post.service';
 import { AuthService } from '../services/auth.service';
-import { CreatePostComponent } from '../create-post/create-post.component';
-
+import { NavbarComponent } from '../navbar/navbar.component';
+import { SideMenuComponent } from '../side-menu/side-menu.component';
+import { ThemeService } from '../services/themeService';
 @Component({
   selector: 'app-home',
   standalone: true,
-  imports: [CommonModule, FormsModule, CreatePostComponent],
+  imports: [CommonModule, FormsModule, NavbarComponent, SideMenuComponent],
   templateUrl: './home.component.html',
   styleUrls: ['./home.component.css'],
 })
 export class HomeComponent implements OnInit {
+  private themeService = inject(ThemeService);
+  activeCategory: string = 'All';
   searchQuery: string = '';
   posts: Post[] = [];
   selectedPost: Post | null = null;
-  isCreateModalOpen: boolean = false;
-  newPost = { title: '', content: '', author: 'Current User' };
   editingPostId: number | null = null;
   editContent: string = '';
-  isDarkMode: boolean = false;
-
+  darkMode$ = this.themeService.darkMode$;
   constructor(
     private router: Router,
     private postService: PostService,
@@ -32,6 +32,15 @@ export class HomeComponent implements OnInit {
   ) {}
   ngOnInit(): void {
     this.loadPosts();
+  }
+
+  onPostAdded(newPost: Post) {
+    this.posts.unshift(newPost);
+  }
+
+  handleCategoryChange(category: string) {
+    this.activeCategory = category;
+    console.log('Filtering by:', category);
   }
 
   loadPosts() {
@@ -58,40 +67,6 @@ export class HomeComponent implements OnInit {
         console.error('Error fetching posts:', err);
       },
     });
-  }
-  openCreatePost() {
-    this.authService.checkAuth(() => {
-      this.isCreateModalOpen = true;
-      document.body.style.overflow = 'hidden';
-    });
-  }
-
-  handlePostCreated(newPost: Post) {
-    this.posts.unshift(newPost);
-    this.closeCreateModal();
-  }
-
-  closeCreateModal() {
-    this.isCreateModalOpen = false;
-    document.body.style.overflow = 'auto';
-  }
-
-  closeCreatePost() {
-    this.isCreateModalOpen = false;
-    this.newPost = { title: '', content: '', author: 'Current User' };
-    document.body.style.overflow = 'auto';
-  }
-
-  submitPost() {
-    if (this.newPost.title.trim() && this.newPost.content.trim()) {
-      this.postService.createPost(this.newPost as Post).subscribe({
-        next: (savedPost) => {
-          this.posts.unshift(savedPost);
-          this.closeCreatePost();
-        },
-        error: (err) => console.error('Could not save post', err),
-      });
-    }
   }
 
   isAuthor(post: any): boolean {
@@ -240,10 +215,5 @@ export class HomeComponent implements OnInit {
 
   onSearch() {
     console.log('Searching for:', this.searchQuery);
-  }
-
-  logout() {
-    localStorage.clear();
-    this.router.navigate(['/login']);
   }
 }

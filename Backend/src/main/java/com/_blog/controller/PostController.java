@@ -45,14 +45,21 @@ public class PostController {
 			@RequestPart(value = "file", required = false) MultipartFile file,
 			Principal principal) {
 		if (principal != null) {
-			post.setAuthor(principal.getName());
+			User user = userRepository.findByUsername(principal.getName())
+					.orElseThrow(() -> new RuntimeException("User not found"));
+			post.setAuthor(user);
 		}
+
 		if (file != null && !file.isEmpty()) {
 			try {
 				String fileName = saveFile(file);
 				post.setMediaUrl("/uploads/" + fileName);
 				String contentType = file.getContentType();
-				post.setMediaType(contentType != null && contentType.startsWith("video") ? "VIDEO" : "IMAGE");
+				if (contentType != null && contentType.startsWith("video")) {
+					post.setMediaType("VIDEO");
+				} else {
+					post.setMediaType("IMAGE");
+				}
 			} catch (IOException e) {
 				return ResponseEntity.internalServerError().body("Could not save file.");
 			}
