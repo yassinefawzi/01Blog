@@ -1,9 +1,8 @@
 package com._blog.model;
 
 import jakarta.persistence.*;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.ToString;
+import lombok.*;
+import com._blog.model.Post;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -15,7 +14,9 @@ import jakarta.validation.constraints.Size;
 @Entity
 @Table(name = "users")
 @Data
-
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class User {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -46,23 +47,23 @@ public class User {
 
 	@ManyToMany(fetch = FetchType.EAGER)
 	@JoinTable(name = "user_roles", joinColumns = @JoinColumn(name = "user_id"), inverseJoinColumns = @JoinColumn(name = "role_id"))
+	@Builder.Default
 	private Set<Role> roles = new HashSet<>();
 
-	@OneToMany(mappedBy = "author", cascade = CascadeType.ALL, orphanRemoval = true)
-    @ToString.Exclude
-    @EqualsAndHashCode.Exclude
-    private List<Post> posts = new ArrayList<>();
+	@OneToMany(mappedBy = "author", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+	@ToString.Exclude
+	@EqualsAndHashCode.Exclude
+	@Builder.Default
+	private List<Post> posts = new ArrayList<>();
 
 	@ManyToMany
-    @JoinTable(
-        name = "user_following",
-        joinColumns = @JoinColumn(name = "user_id"),
-        inverseJoinColumns = @JoinColumn(name = "following_id")
-    )
-    @ToString.Exclude
-    private Set<User> following = new HashSet<>();
+	@JoinTable(name = "user_following", joinColumns = @JoinColumn(name = "user_id"), inverseJoinColumns = @JoinColumn(name = "following_id"))
+	@ToString.Exclude
+	@Builder.Default
+	private Set<User> following = new HashSet<>();
 
 	@ManyToMany(mappedBy = "following")
-    @ToString.Exclude
-    private Set<User> followers = new HashSet<>();
+	@ToString.Exclude
+	@Builder.Default
+	private Set<User> followers = new HashSet<>();
 }

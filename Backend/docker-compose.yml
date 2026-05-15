@@ -26,9 +26,12 @@ services:
       mysql-db:
         condition: service_healthy
     environment:
-      SPRING_DATASOURCE_URL: jdbc:mysql://mysql-db:3306/blogdb
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql-db:3306/blogdb?allowPublicKeyRetrieval=true&useSSL=false&serverTimezone=UTC
       SPRING_DATASOURCE_USERNAME: bloguser
       SPRING_DATASOURCE_PASSWORD: blogpass
+      SPRING_JPA_HIBERNATE_DDL_AUTO: update
+      SPRING_DATASOURCE_DRIVER_CLASS_NAME: com.mysql.cj.jdbc.Driver
+      SPRING_JPA_SHOW_SQL: "true"
     volumes:
       - ./uploads:/app/uploads
 

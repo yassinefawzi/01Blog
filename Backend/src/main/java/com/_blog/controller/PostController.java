@@ -11,6 +11,7 @@ import com._blog.repository.UserRepository;
 import com._blog.model.User;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.http.MediaType;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -26,7 +27,6 @@ import java.util.Set;
 
 @RestController
 @RequestMapping("/api/posts")
-@CrossOrigin(origins = "http://localhost:4200")
 public class PostController {
 
 	@Autowired
@@ -41,7 +41,7 @@ public class PostController {
 		return postRepository.findAll();
 	}
 
-	@PostMapping(consumes = { "multipart/form-data" })
+	@PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
 	public ResponseEntity<?> createPost(
 			@RequestPart("post") Post post,
 			@RequestPart(value = "file", required = false) MultipartFile file,

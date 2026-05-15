@@ -1,4 +1,4 @@
-import { Injectable, PLATFORM_ID, inject, Inject } from '@angular/core';
+import { Injectable, PLATFORM_ID, inject } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
@@ -13,10 +13,10 @@ export class AuthService {
 
   private currentUserSubject = new BehaviorSubject<any>(null);
   public currentUser$ = this.currentUserSubject.asObservable();
-  
+
   private http = inject(HttpClient);
   private platformId = inject(PLATFORM_ID);
-  
+
   private isLoadingSubject = new BehaviorSubject<boolean>(true);
   public isLoading$ = this.isLoadingSubject.asObservable();
 
@@ -50,32 +50,47 @@ export class AuthService {
   }
 
   register(userData: any): Observable<any> {
-    return this.http.post(`${this.userUrl}/register`, userData);
+    return this.http.post(`${this.userUrl}/register`, userData, {
+      withCredentials: true,
+      responseType: 'text',
+    });
   }
 
   login(credentials: any): Observable<any> {
-    return this.http.post<any>(`${this.authUrl}/login`, credentials).pipe(
-      tap((user) => {
-        if (isPlatformBrowser(this.platformId)) {
-          localStorage.setItem('user', JSON.stringify(user));
-        }
-        this.currentUserSubject.next(user);
-        this.router.navigate(['/home']);
+    return this.http
+      .post<any>(`${this.authUrl}/login`, credentials, {
+        withCredentials: true,
       })
-    );
+      .pipe(
+        tap((user) => {
+          if (isPlatformBrowser(this.platformId)) {
+            localStorage.setItem('user', JSON.stringify(user));
+          }
+          this.currentUserSubject.next(user);
+          this.router.navigate(['/home']);
+        }),
+      );
   }
 
   logout(): void {
-    this.http.post(`${this.authUrl}/logout`, {}).subscribe({
-      next: () => {
-        this.logoutLocal();
-        this.router.navigate(['/login']);
-      },
-      error: () => {
-        this.logoutLocal();
-        this.router.navigate(['/login']);
-      }
-    });
+    this.http
+      .post(
+        `${this.authUrl}/logout`,
+        {},
+        {
+          withCredentials: true,
+        },
+      )
+      .subscribe({
+        next: () => {
+          this.logoutLocal();
+          this.router.navigate(['/login']);
+        },
+        error: () => {
+          this.logoutLocal();
+          this.router.navigate(['/login']);
+        },
+      });
   }
 
   checkSession(): Observable<any> {
@@ -86,7 +101,7 @@ export class AuthService {
         this.logoutLocal();
         return of(null);
       }),
-      finalize(() => this.isLoadingSubject.next(false))
+      finalize(() => this.isLoadingSubject.next(false)),
     );
   }
 

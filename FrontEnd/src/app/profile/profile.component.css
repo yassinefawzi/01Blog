@@ -31,13 +31,13 @@
   padding: 20px;
   border-radius: 12px;
   margin-bottom: 15px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
   transition: transform 0.2s ease;
 }
 
 :host-context(.dark-mode) .post-card {
   background: #1e1e1e;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
 }
 
 .post-card:hover {
@@ -98,17 +98,44 @@
 }
 
 .follow-btn.following:hover {
-  background-color: rgba(239, 68, 68, 0.1); /* Light red tint */
+  background-color: rgba(239, 68, 68, 0.1);
   border-color: #ef4444;
   color: #ef4444;
 }
 
 .follow-btn.following:hover::after {
-  content: "Unfollow";
+  content: 'Unfollow';
 }
 
 .follow-btn.following:hover span {
   display: none;
+}
+
+.empty-state {
+  text-align: center;
+  padding: 40px;
+  background: rgba(0, 0, 0, 0.02);
+  border: 2px dashed #ddd;
+  border-radius: 12px;
+  color: #888;
+}
+
+.post-media-wrapper {
+  margin: 15px 0;
+  border-radius: 8px;
+  overflow: hidden;
+  background: #f9f9f9;
+}
+
+.feed-media {
+  width: 100%;
+  max-height: 400px;
+  display: block;
+  object-fit: cover;
+}
+
+:host-context(.dark-mode) .post-media-wrapper {
+  background: #2a2a2a;
 }
 
 @media (max-width: 768px) {

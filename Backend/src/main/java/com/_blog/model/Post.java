@@ -7,6 +7,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com._blog.model.User;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @Entity
@@ -19,7 +20,8 @@ public class Post {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
-    @JsonIgnoreProperties({"posts", "password", "email", "followers", "following"})
+	@JsonIgnoreProperties({"posts", "password", "email"})
+	@JsonProperty(access = JsonProperty.Access.READ_ONLY)
     private User author;
 
     private String title;

@@ -3,11 +3,14 @@ import { CommonModule } from '@angular/common';
 import { UserService } from '../services/user.service';
 import { AuthService } from '../services/auth.service';
 import { ActivatedRoute } from '@angular/router';
+import { User } from '../models/user.model';
+import { Post } from '../models/post.model';
+import { RouterModule } from '@angular/router';
 
 @Component({
   selector: 'app-profile',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, RouterModule],
   templateUrl: './profile.component.html',
   styleUrls: ['./profile.component.css'],
 })
@@ -17,11 +20,11 @@ export class ProfileComponent implements OnInit {
   private authService = inject(AuthService);
   private cdr = inject(ChangeDetectorRef);
 
-  user: any = null;
+  user: User | null = null;
   postCount: number = 0;
   followersCount: number = 0;
   followingCount: number = 0;
-  userPosts: any[] = [];
+  userPosts: Post[] = [];
   isFollowing: boolean = false;
 
   ngOnInit(): void {
@@ -35,29 +38,24 @@ export class ProfileComponent implements OnInit {
 
   loadProfile(username: string) {
     this.userService.getProfile(username).subscribe({
-      next: (data: any) => {
-        // Map the DTO data back to the individual variables your HTML uses
-        this.user = data; // So {{ user.username }} works
-        this.postCount = data.postCount || 0;
-        this.followersCount = data.followerCount || 0;
-        this.followingCount = data.followingCount || 0;
-        this.userPosts = data.recentPosts || [];
-        this.isFollowing = data.isFollowing || false;
-
+      next: (data: User) => {
+        console.log('FULL DATA RECEIVED:', data);
+        this.user = data;
+        this.userPosts = data.posts || [];
+        this.postCount = this.userPosts.length;
         this.cdr.detectChanges();
       },
-      error: (err: any) => {
-        console.error('Error loading profile:', err);
-      },
+      error: (err) => console.error('Error:', err),
     });
   }
-
   toggleFollow() {
-    if (!this.user || !this.authService.getUsername()) return;
-    this.userService.toggleFollow(this.user.username).subscribe({
+    const currentUsername = this.user?.username;
+    if (!currentUsername || !this.authService.getUsername()) return;
+
+    this.userService.toggleFollow(currentUsername).subscribe({
       next: (res: any) => {
         this.isFollowing = res.status === 'followed';
-        this.loadProfile(this.user.username);
+        this.loadProfile(currentUsername);
       },
       error: (err: any) => console.error('Follow toggle failed', err),
     });

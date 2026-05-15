@@ -57,11 +57,11 @@ public class JwtUtil {
 	}
 
 	public ResponseCookie getCleanJwtCookie() {
-        return ResponseCookie.from(cookieName, "")
-                .path("/")
-                .maxAge(0)
-                .build();
-    }
+		return ResponseCookie.from(cookieName, "")
+				.path("/")
+				.maxAge(0)
+				.build();
+	}
 
 	public String extractUsername(String token) {
 		return getClaims(token).getSubject();

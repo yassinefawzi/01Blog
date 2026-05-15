@@ -34,15 +34,19 @@ public class SecurityConfig {
 	public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
 		http
 				.cors(Customizer.withDefaults())
-				.csrf(AbstractHttpConfigurer::disable)
+				.csrf(csrf -> csrf.disable())
 				.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 				.authorizeHttpRequests(auth -> auth
 						.requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+						.requestMatchers("/api/auth/**").permitAll()
+						.requestMatchers("/error").permitAll()
 						.requestMatchers(HttpMethod.POST, "/api/users/register").permitAll()
-						.requestMatchers(HttpMethod.POST, "/api/auth/login").permitAll()
+
 						.requestMatchers(HttpMethod.GET, "/api/posts/**").permitAll()
-						.requestMatchers(HttpMethod.PUT, "/api/posts/**").permitAll()
+						.requestMatchers(HttpMethod.POST, "/api/posts/**").authenticated()
+						.requestMatchers(HttpMethod.PUT, "/api/posts/**").authenticated()
 						.requestMatchers(HttpMethod.DELETE, "/api/posts/**").authenticated()
+
 						.requestMatchers("/api/users/profile/**", "/api/users/follow/**").authenticated()
 						.requestMatchers("/uploads/**").permitAll()
 						.anyRequest().authenticated())
@@ -57,8 +61,8 @@ public class SecurityConfig {
 		configuration.setAllowedOrigins(List.of("http://localhost:4200"));
 		configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
 		configuration.setAllowedHeaders(List.of("Authorization", "Content-Type", "Accept"));
+		configuration.setExposedHeaders(List.of("Authorization"));
 		configuration.setAllowCredentials(true);
-
 		UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
 		source.registerCorsConfiguration("/**", configuration);
 		return source;

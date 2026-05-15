@@ -1,3 +1,5 @@
+import { Post } from './post.model';
+
 export interface User {
   id: number;
   username: string;
@@ -10,4 +12,5 @@ export interface User {
   bio?: string;
   followersCount?: number;
   followingCount?: number;
+  posts: Post[];
 }

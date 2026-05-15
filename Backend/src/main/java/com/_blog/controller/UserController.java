@@ -12,7 +12,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/users")
@@ -38,7 +41,6 @@ public class UserController {
 		user.setLastName(request.getLastName());
 		user.setPhoneNumber(request.getPhoneNumber());
 		user.setCity(request.getCity());
-
 		userService.registerUser(user);
 		return new ResponseEntity<>(Map.of("message", "registration successful."), HttpStatus.CREATED);
 	}
@@ -47,16 +49,19 @@ public class UserController {
 	public ResponseEntity<?> getUserProfile(@PathVariable String username) {
 		return userRepository.findByUsername(username)
 				.map(user -> {
-					UserProfileDTO profile = UserProfileDTO.builder()
-							.username(user.getUsername())
-							.firstName(user.getFirstName())
-							.lastName(user.getLastName())
-							.postCount(postRepository.countByAuthorUsername(username))
-							.followersCount(user.getFollowers().size())
-							.followingCount(user.getFollowing().size())
-							.posts(postRepository.findByAuthorUsernameOrderByCreatedAtDesc(username))
-							.build();
-					return ResponseEntity.ok(profile);
+					Map<String, Object> response = new HashMap<>();
+					response.put("id", user.getId());
+					response.put("username", user.getUsername());
+					response.put("email", user.getEmail());
+					response.put("posts", user.getPosts());
+					response.put("followersCount", user.getFollowers() != null ? user.getFollowers().size() : 0);
+					response.put("followingCount", user.getFollowing() != null ? user.getFollowing().size() : 0);
+					List<String> roles = user.getRoles().stream()
+							.map(role -> role.getName())
+							.collect(Collectors.toList());
+					response.put("roles", roles);
+
+					return ResponseEntity.ok(response);
 				})
 				.orElse(ResponseEntity.notFound().build());
 	}

@@ -1,13 +1,13 @@
 <div class="profile-page-wrapper" *ngIf="user">
   <div class="profile-sidebar">
     <div class="profile-card">
-      <div class="avatar-circle">
-        {{ user.username?.charAt(0).toUpperCase() }}
+      <div class="avatar-circle" *ngIf="user.username">
+        {{ user.username[0].toUpperCase() }}
       </div>
       <h1 class="username">@{{ user.username }}</h1>
 
       <button class="follow-btn" [class.following]="isFollowing" (click)="toggleFollow()">
-        {{ isFollowing ? 'Following' : 'Follow' }}
+        <span>{{ isFollowing ? 'Following' : 'Follow' }}</span>
       </button>
 
       <div class="stats-bar">
@@ -32,14 +32,24 @@
     <div class="post-card" *ngFor="let post of userPosts">
       <div class="post-header">
         <h4>{{ post.title }}</h4>
-        <span class="post-date">{{ post.date | date: 'mediumDate' }}</span>
+        <span class="post-date">{{ post.createdAt | date: 'mediumDate' }}</span>
       </div>
-      <p>{{ post.excerpt }}</p>
-      <a class="read-more">Read more →</a>
-    </div>
-
-    <div class="empty-state" *ngIf="userPosts.length === 0">
-      <p>No posts created yet.</p>
+      <div class="post-media-wrapper" *ngIf="post.mediaUrl">
+        <img
+          *ngIf="post.mediaType === 'IMAGE'"
+          [src]="'http://localhost:8080' + post.mediaUrl"
+          class="feed-media"
+          alt="Post content"
+        />
+        <video
+          *ngIf="post.mediaType === 'VIDEO'"
+          [src]="'http://localhost:8080' + post.mediaUrl"
+          controls
+          class="feed-media"
+        ></video>
+      </div>
+      <p>{{ post.content | slice: 0 : 150 }}{{ post.content.length > 150 ? '...' : '' }}</p>
+      <a class="read-more" [routerLink]="['/posts', post.id]">Read more →</a>
     </div>
   </div>
 </div>
