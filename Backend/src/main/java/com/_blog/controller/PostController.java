@@ -2,16 +2,16 @@ package com._blog.controller;
 
 import com._blog.model.Comment;
 import com._blog.model.Post;
-import com._blog.repository.PostRepository;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.*;
 import com._blog.model.PostVote;
-import com._blog.repository.VoteRepository;
-import com._blog.repository.UserRepository;
 import com._blog.model.User;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.multipart.MultipartFile;
+import com._blog.repository.PostRepository;
+import com._blog.repository.UserRepository;
+import com._blog.repository.VoteRepository;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -46,11 +46,13 @@ public class PostController {
 			@RequestPart("post") Post post,
 			@RequestPart(value = "file", required = false) MultipartFile file,
 			Principal principal) {
-		if (principal != null) {
-			User user = userRepository.findByUsername(principal.getName())
-					.orElseThrow(() -> new RuntimeException("User not found"));
-			post.setAuthor(user);
+		if (principal == null) {
+			return ResponseEntity.status(401).body("Unauthorized");
 		}
+
+		User user = userRepository.findByUsername(principal.getName())
+				.orElseThrow(() -> new RuntimeException("User not found"));
+		post.setAuthor(user);
 
 		if (file != null && !file.isEmpty()) {
 			try {
@@ -70,29 +72,35 @@ public class PostController {
 	}
 
 	@PostMapping("/{postId}/comments")
-	public ResponseEntity<Comment> addComment(
+	public ResponseEntity<?> addComment(
 			@PathVariable Long postId,
 			@RequestBody Comment comment,
 			Principal principal) {
-		Post post = postRepository.findById(postId)
-				.orElseThrow(() -> new RuntimeException("Post not found"));
-
-		if (principal != null) {
-			comment.setAuthor(principal.getName());
-		} else {
+		if (principal == null) {
 			return ResponseEntity.status(401).build();
 		}
+
+		Post post = postRepository.findById(postId)
+				.orElseThrow(() -> new RuntimeException("Post not found"));
+		comment.setAuthor(principal.getName());
 		comment.setPost(post);
+
 		post.getComments().add(comment);
 		Post savedPost = postRepository.save(post);
+
 		Comment savedComment = savedPost.getComments().get(savedPost.getComments().size() - 1);
 		return ResponseEntity.ok(savedComment);
 	}
 
 	@DeleteMapping("/{postId}")
 	public ResponseEntity<?> deletePost(@PathVariable Long postId, Principal principal) {
-		Post post = postRepository.findById(postId).orElseThrow(() -> new RuntimeException("Post not found"));
-		if (post.getAuthor().equals(principal.getName())) {
+		if (principal == null)
+			return ResponseEntity.status(401).build();
+
+		Post post = postRepository.findById(postId)
+				.orElseThrow(() -> new RuntimeException("Post not found"));
+
+		if (post.getAuthor() != null && post.getAuthor().getUsername().equals(principal.getName())) {
 			if (post.getMediaUrl() != null) {
 				deleteFile(post.getMediaUrl());
 			}
@@ -100,36 +108,65 @@ public class PostController {
 			return ResponseEntity.ok().build();
 		}
 
-		return ResponseEntity.status(403).build();
-	}
-
-	private void deleteFile(String mediaUrl) {
-		try {
-			String relativePath = mediaUrl.startsWith("/") ? mediaUrl.substring(1) : mediaUrl;
-			Path filePath = Paths.get(relativePath);
-
-			Files.deleteIfExists(filePath);
-			System.out.println("Successfully deleted file: " + filePath);
-		} catch (IOException e) {
-			System.err.println("Failed to delete file: " + e.getMessage());
-		}
+		return ResponseEntity.status(403).body("You are not authorized to delete this post.");
 	}
 
 	@DeleteMapping("/{postId}/comments/{commentId}")
-	public ResponseEntity<?> deleteComment(@PathVariable Long postId, @PathVariable Long commentId,
+	public ResponseEntity<?> deleteComment(
+			@PathVariable Long postId,
+			@PathVariable Long commentId,
 			Principal principal) {
+		if (principal == null)
+			return ResponseEntity.status(401).build();
+
 		Post post = postRepository.findById(postId)
 				.orElseThrow(() -> new RuntimeException("Post not found"));
+
 		Comment commentToDelete = post.getComments().stream()
 				.filter(c -> c.getId().equals(commentId))
 				.findFirst()
 				.orElseThrow(() -> new RuntimeException("Comment not found"));
-		if (principal != null && commentToDelete.getAuthor().equals(principal.getName())) {
+
+		boolean isCommentAuthor = commentToDelete.getAuthor() != null &&
+				commentToDelete.getAuthor().equals(principal.getName());
+
+		boolean isPostOwner = post.getAuthor() != null &&
+				post.getAuthor().getUsername().equals(principal.getName());
+
+		if (isCommentAuthor || isPostOwner) {
 			post.getComments().remove(commentToDelete);
 			postRepository.save(post);
 			return ResponseEntity.ok().build();
 		}
-		return ResponseEntity.status(403).body("You can only delete your own comments");
+		return ResponseEntity.status(403).body("You can only delete comments you wrote or own.");
+	}
+
+	@PutMapping("/{postId}")
+	@org.springframework.transaction.annotation.Transactional
+	public ResponseEntity<?> updatePost(
+			@PathVariable Long postId,
+			@RequestBody java.util.Map<String, String> payload,
+			Principal principal) {
+		if (principal == null)
+			return ResponseEntity.status(401).build();
+
+		Post post = postRepository.findById(postId)
+				.orElseThrow(() -> new RuntimeException("Post not found"));
+
+		if (post.getAuthor() == null || !post.getAuthor().getUsername().equals(principal.getName())) {
+			return ResponseEntity.status(403).body("Unauthorized edit request.");
+		}
+
+		String newContent = payload.get("content");
+		if (newContent != null) {
+			post.setContent(newContent);
+		}
+		java.util.Map<String, Object> response = new java.util.HashMap<>();
+		response.put("id", post.getId());
+		response.put("content", post.getContent());
+		response.put("status", "SUCCESS");
+
+		return ResponseEntity.ok(response);
 	}
 
 	@PutMapping("/{postId}/like")
@@ -187,26 +224,37 @@ public class PostController {
 		return ResponseEntity.ok(postRepository.save(post));
 	}
 
-	@PutMapping("/{postId}")
-	public ResponseEntity<?> updatePost(
-			@PathVariable Long postId,
-			@RequestBody Post postDetails,
-			Principal principal) {
-		Post post = postRepository.findById(postId).orElseThrow(() -> new RuntimeException("Post not found"));
-		if (principal == null || !post.getAuthor().equals(principal.getName())) {
-			return ResponseEntity.status(403).body("You are not authorized to edit this post.");
+	@GetMapping("/feed")
+	public ResponseEntity<List<Post>> getSocialFeed(Principal principal) {
+		if (principal == null)
+			return ResponseEntity.status(401).build();
+
+		User currentUser = userRepository.findByUsername(principal.getName())
+				.orElseThrow(() -> new RuntimeException("User not found"));
+
+		Set<User> feedAuthors = new HashSet<>(currentUser.getFollowing());
+		feedAuthors.add(currentUser);
+		List<Post> feed = postRepository.findByAuthorInOrderByCreatedAtDesc(feedAuthors);
+
+		return ResponseEntity.ok(feed);
+	}
+
+	private void deleteFile(String mediaUrl) {
+		try {
+			String relativePath = mediaUrl.startsWith("/") ? mediaUrl.substring(1) : mediaUrl;
+			Path filePath = Paths.get(relativePath);
+			Files.deleteIfExists(filePath);
+			System.out.println("Successfully deleted file: " + filePath);
+		} catch (IOException e) {
+			System.err.println("Failed to delete file: " + e.getMessage());
 		}
-		post.setContent(postDetails.getContent());
-		post.setCategory(postDetails.getCategory());
-		return ResponseEntity.ok(postRepository.save(post));
 	}
 
 	private Long getUserIdFromPrincipal(Principal principal) {
 		if (principal == null) {
 			throw new RuntimeException("Not authenticated");
 		}
-		String emailOrUsername = principal.getName();
-		return userRepository.findByUsername(emailOrUsername)
+		return userRepository.findByUsername(principal.getName())
 				.map(User::getId)
 				.orElseThrow(() -> new RuntimeException("User not found"));
 	}
@@ -222,20 +270,5 @@ public class PostController {
 			Files.copy(inputStream, filePath, StandardCopyOption.REPLACE_EXISTING);
 		}
 		return fileName;
-	}
-
-	@GetMapping("/feed")
-	public ResponseEntity<List<Post>> getSocialFeed(Principal principal) {
-		if (principal == null)
-			return ResponseEntity.status(401).build();
-
-		User currentUser = userRepository.findByUsername(principal.getName())
-				.orElseThrow(() -> new RuntimeException("User not found"));
-
-		Set<User> feedAuthors = new HashSet<>(currentUser.getFollowing());
-		feedAuthors.add(currentUser);
-		List<Post> feed = postRepository.findByAuthorInOrderByCreatedAtDesc(feedAuthors);
-
-		return ResponseEntity.ok(feed);
 	}
 }
