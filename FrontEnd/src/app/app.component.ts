@@ -10,9 +10,4 @@ import { RouterModule } from '@angular/router';
   template: `<router-outlet></router-outlet>`,
 })
 export class AppComponent {
-  constructor(private authService: AuthService) {}
-
-  ngOnInit() {
-    this.authService.checkSession().subscribe();
-  }
 }

@@ -1,23 +1,28 @@
 import { HttpInterceptorFn } from '@angular/common/http';
+import { inject, PLATFORM_ID } from '@angular/core';
+import { isPlatformBrowser } from '@angular/common';
 
 export const authInterceptor: HttpInterceptorFn = (req, next) => {
-  const userData = localStorage.getItem('user');
-  let token = '';
-
-  if (userData) {
-    try {
-      const user = JSON.parse(userData);
-      token = user.token || user.accessToken;
-	  console.log("Token extracted from localStorage:", token);
-    } catch (e) {
-      console.error("Token parsing failed", e);
+  const platformId = inject(PLATFORM_ID);
+  let userToken = '';
+  if (isPlatformBrowser(platformId)) {
+    const savedUser = localStorage.getItem('user');
+    if (savedUser) {
+      try {
+        const parsedUser = JSON.parse(savedUser);
+        userToken = parsedUser?.token || ''; 
+      } catch (e) {
+        console.error('Error parsing user from localStorage in interceptor', e);
+      }
     }
   }
-
-  const authReq = req.clone({
-    setHeaders: token ? { Authorization: `Bearer ${token}` } : {},
-    withCredentials: true
-  });
-
-  return next(authReq);
+  if (userToken) {
+    const clonedRequest = req.clone({
+      setHeaders: {
+        Authorization: `Bearer ${userToken}`,
+      },
+    });
+    return next(clonedRequest);
+  }
+  return next(req);
 };

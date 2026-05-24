@@ -44,7 +44,7 @@ public class AuthController {
 				.map(role -> role.getName())
 				.collect(Collectors.toList());
 		String token = jwtUtil.generateToken(user.getUsername(), roles);
-		return ResponseEntity.ok(new LoginResponse(user.getUsername(), roles, token));
+		return ResponseEntity.ok(new LoginResponse(token, user.getUsername(), roles));
 	}
 
 	@PostMapping("/logout")
@@ -70,6 +70,6 @@ public class AuthController {
 				.map(role -> role.getName())
 				.collect(Collectors.toList());
 		String token = jwtUtil.generateToken(user.getUsername(), roles);
-		return ResponseEntity.ok(new LoginResponse(user.getUsername(), roles, token));
+		return ResponseEntity.ok(new LoginResponse(token, user.getUsername(), roles));
 	}
 }

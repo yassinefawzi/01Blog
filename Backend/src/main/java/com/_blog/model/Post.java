@@ -7,7 +7,6 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com._blog.model.User;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @Entity
@@ -18,10 +17,10 @@ public class Post {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "user_id", nullable = false)
-	@JsonIgnoreProperties({"posts", "password", "email"})
-	@JsonProperty(access = JsonProperty.Access.READ_ONLY)
+    @JsonIgnoreProperties({"posts", "password", "email", "following", "followers", "roles"})
+    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     private User author;
 
     private String title;
@@ -34,7 +33,7 @@ public class Post {
     private int likes = 0;
     private int dislikes = 0;
 
-    @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
     private List<Comment> comments = new ArrayList<>();
 
     private String category;

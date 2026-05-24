@@ -30,18 +30,20 @@ export class AuthService {
           localStorage.removeItem('user');
         }
       }
-
       this.checkSession().subscribe({
         next: (user) => {
-          if (!user) this.logoutLocal();
+          if (!user) {
+            this.logoutLocal();
+          }
         },
-        error: () => this.logoutLocal(),
+        error: () => {
+          this.logoutLocal();
+        },
       });
     } else {
       this.isLoadingSubject.next(false);
     }
   }
-
   private logoutLocal() {
     if (isPlatformBrowser(this.platformId)) {
       localStorage.removeItem('user');
@@ -96,14 +98,20 @@ export class AuthService {
   checkSession(): Observable<any> {
     this.isLoadingSubject.next(true);
     return this.http.get<any>(`${this.authUrl}/me`, { withCredentials: true }).pipe(
-      tap((user) => this.currentUserSubject.next(user)),
+      tap((user) => {
+        if (isPlatformBrowser(this.platformId)) {
+          localStorage.setItem('user', JSON.stringify(user));
+        }
+        this.currentUserSubject.next(user);
+      }),
       catchError(() => {
         this.logoutLocal();
         return of(null);
       }),
-      finalize(() => this.isLoadingSubject.next(false)),
+      finalize(() => this.isLoadingSubject.next(false))
     );
   }
+
 
   checkAuth(action: () => void): void {
     if (this.isLoggedIn()) {

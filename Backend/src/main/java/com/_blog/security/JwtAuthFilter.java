@@ -20,56 +20,56 @@ import java.util.stream.Collectors;
 @Component
 public class JwtAuthFilter extends OncePerRequestFilter {
 
-	private static final Logger logger = LoggerFactory.getLogger(JwtAuthFilter.class);
+    private static final Logger logger = LoggerFactory.getLogger(JwtAuthFilter.class);
 
-	private final JwtUtil jwtUtil;
+    private final JwtUtil jwtUtil;
 
-	public JwtAuthFilter(JwtUtil jwtUtil) {
-		this.jwtUtil = jwtUtil;
-	}
+    public JwtAuthFilter(JwtUtil jwtUtil) {
+        this.jwtUtil = jwtUtil;
+    }
 
-	@Override
-	protected void doFilterInternal(HttpServletRequest request,
-			HttpServletResponse response,
-			FilterChain filterChain)
-			throws ServletException, IOException {
+    @Override
+    protected void doFilterInternal(HttpServletRequest request,
+                                    HttpServletResponse response,
+                                    FilterChain filterChain)
+            throws ServletException, IOException {
 
-		String path = request.getServletPath();
-		if (path != null && path.startsWith("/uploads/")) {
-			filterChain.doFilter(request, response);
-			return;
-		}
+        String path = request.getServletPath();
+        if (path != null && path.startsWith("/uploads/")) {
+            filterChain.doFilter(request, response);
+            return;
+        }
 
-		String token = jwtUtil.getJwtFromCookies(request);
-		String authHeader = request.getHeader("Authorization");
+        String token = null;
+        String authHeader = request.getHeader("Authorization");
 
-		if (authHeader != null && authHeader.startsWith("Bearer ")) {
-			token = authHeader.substring(7);
-		} else {
-			token = jwtUtil.getJwtFromCookies(request);
-		}
+        if (authHeader != null && authHeader.startsWith("Bearer ")) {
+            token = authHeader.substring(7);
+        } else {
+            token = jwtUtil.getJwtFromCookies(request);
+        }
 
-		if (token != null && jwtUtil.isTokenValid(token)) {
-			try {
-				String username = jwtUtil.extractUsername(token);
-				List<String> roles = jwtUtil.extractRoles(token);
+        if (token != null && jwtUtil.isTokenValid(token)) {
+            try {
+                String username = jwtUtil.extractUsername(token);
+                List<String> roles = jwtUtil.extractRoles(token);
 
-				List<SimpleGrantedAuthority> authorities = roles.stream()
-						.map(SimpleGrantedAuthority::new)
-						.collect(Collectors.toList());
+                List<SimpleGrantedAuthority> authorities = roles.stream()
+                        .map(SimpleGrantedAuthority::new)
+                        .collect(Collectors.toList());
 
-				UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
-						username, null, authorities);
-				authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-				SecurityContextHolder.getContext().setAuthentication(authentication);
+                UsernamePasswordAuthenticationToken authentication =
+                        new UsernamePasswordAuthenticationToken(username, null, authorities);
+                authentication.setDetails(
+                        new WebAuthenticationDetailsSource().buildDetails(request));
 
-				// ADD THIS LINE:
-				System.out.println("SUCCESSFULLY AUTHENTICATED IN FILTER: " + username + " WITH ROLES: " + authorities);
+                SecurityContextHolder.getContext().setAuthentication(authentication);
+                System.out.println("SUCCESSFULLY AUTHENTICATED IN FILTER: " + username + " WITH ROLES: " + roles);
+            } catch (Exception e) {
+                logger.error("Could not set user authentication: {}", e.getMessage());
+            }
+        }
 
-			} catch (Exception e) {
-				logger.error("Could not set user authentication: {}", e.getMessage());
-			}
-		}
-		filterChain.doFilter(request, response);
-	}
+        filterChain.doFilter(request, response);
+    }
 }

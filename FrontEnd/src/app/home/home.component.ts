@@ -1,5 +1,5 @@
-import { Component, OnInit, ChangeDetectorRef, inject } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, OnInit, ChangeDetectorRef, inject, PLATFORM_ID } from '@angular/core';
+import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { Post, Comment } from '../models/post.model';
@@ -17,6 +17,7 @@ import { ThemeService } from '../services/themeService';
 })
 export class HomeComponent implements OnInit {
   private themeService = inject(ThemeService);
+  private platformId = inject(PLATFORM_ID);
   activeCategory: string = 'All';
   searchQuery: string = '';
   posts: Post[] = [];
@@ -31,7 +32,9 @@ export class HomeComponent implements OnInit {
     private cdr: ChangeDetectorRef,
   ) {}
   ngOnInit(): void {
-    this.fetchPosts();
+    if (isPlatformBrowser(this.platformId)) {
+      this.fetchPosts();
+    }
   }
 
   onPostAdded(newPost: Post) {
@@ -46,8 +49,8 @@ export class HomeComponent implements OnInit {
   fetchPosts() {
     this.postService.getSocialFeed().subscribe({
       next: (data) => {
+        console.log('🟢 Backend successfully sent data:', data);
         this.posts = data.map((post) => {
-          // Sort comments newest first
           if (post.comments) {
             post.comments.sort((a, b) => {
               const dateB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
@@ -67,7 +70,12 @@ export class HomeComponent implements OnInit {
         this.cdr.detectChanges();
       },
       error: (err) => {
-        console.error('Error fetching social feed:', err);
+        console.error('🔴 --- DETAILED BACKEND ERROR ---');
+        console.error('Status:', err.status);
+        console.error('Message:', err.message);
+
+        console.log('Spring Boot Error Body:', err.error);
+        console.error('---------------------------------');
       },
     });
   }
