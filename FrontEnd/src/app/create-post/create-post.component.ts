@@ -32,8 +32,8 @@ export class CreatePostComponent {
   onFileSelected(event: any) {
     const file = event.target.files[0];
     if (file) {
-      if (file.size > 1048576) {
-        this.fileError = 'File is too large (max 1MB)';
+      if (file.size > 10485760) {
+        this.fileError = 'File is too large (max 10MB)';
         this.selectedFile = null;
       } else {
         this.fileError = '';

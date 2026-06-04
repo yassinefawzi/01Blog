@@ -65,11 +65,18 @@ public class UserController {
 					profileDTO.setFollowingCount(followingCount);
 					profileDTO.setPostCount(postCount);
 
-					List<PostSummaryDTO> postDTOs = user.getPosts().stream().map(post -> {
+					List<PostSummaryDTO> postDTOs = user.getPosts().stream()
+							.filter(post -> !post.isHidden())
+							.map(post -> {
 						PostSummaryDTO pDto = new PostSummaryDTO();
 						pDto.setId(post.getId());
 						pDto.setAuthorName(post.getAuthor().getUsername());
+						pDto.setTitle(post.getTitle());
 						pDto.setContent(post.getContent());
+						pDto.setCategory(post.getCategory());
+						pDto.setMediaUrl(post.getMediaUrl());
+						pDto.setMediaType(post.getMediaType());
+						pDto.setCreatedAt(post.getCreatedAt());
 						pDto.setLikes(post.getLikes());
 						pDto.setDislikes(post.getDislikes());
 						pDto.setCommentCount(post.getComments() != null ? post.getComments().size() : 0);
@@ -78,7 +85,9 @@ public class UserController {
 							CommentDTO cDto = new CommentDTO();
 							cDto.setId(c.getId());
 							cDto.setContent(c.getContent());
+							cDto.setText(c.getContent());
 							cDto.setAuthorName(c.getAuthor() != null ? c.getAuthor().getUsername() : "Unknown");
+							cDto.setCreatedAt(c.getCreatedAt());
 							return cDto;
 						}).collect(Collectors.toList());
 

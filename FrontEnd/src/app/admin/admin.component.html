@@ -1,0 +1,73 @@
+<div class="admin-page">
+  <app-navbar></app-navbar>
+
+  <main class="admin-container">
+    <header class="admin-header">
+      <h1>Admin Dashboard</h1>
+      <div class="stats-row" *ngIf="stats">
+        <span>{{ stats.userCount }} users</span>
+        <span>{{ stats.postCount }} posts</span>
+        <span>{{ stats.reportCount }} reports</span>
+      </div>
+    </header>
+
+    <nav class="admin-tabs">
+      <button [class.active]="activeTab === 'users'" (click)="switchTab('users')">Users</button>
+      <button [class.active]="activeTab === 'posts'" (click)="switchTab('posts')">Posts</button>
+      <button [class.active]="activeTab === 'reports'" (click)="switchTab('reports')">Reports</button>
+    </nav>
+
+    <section *ngIf="activeTab === 'users'" class="admin-panel">
+      <table>
+        <thead>
+          <tr>
+            <th>Username</th>
+            <th>Email</th>
+            <th>Posts</th>
+            <th>Status</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let user of users">
+            <td>@{{ user.username }}</td>
+            <td>{{ user.email }}</td>
+            <td>{{ user.postCount }}</td>
+            <td>{{ user.banned ? 'Banned' : 'Active' }}</td>
+            <td class="actions">
+              <button *ngIf="!user.banned" (click)="banUser(user)">Ban</button>
+              <button *ngIf="user.banned" (click)="unbanUser(user)">Unban</button>
+              <button class="danger" (click)="deleteUser(user)">Delete</button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section *ngIf="activeTab === 'posts'" class="admin-panel">
+      <div class="post-row" *ngFor="let post of posts">
+        <div>
+          <strong>@{{ postAuthor(post) }}</strong>
+          <h4>{{ post.title }}</h4>
+          <p>{{ post.content }}</p>
+        </div>
+        <div class="actions">
+          <button (click)="hidePost(post)">Hide</button>
+          <button class="danger" (click)="deletePost(post)">Delete</button>
+        </div>
+      </div>
+    </section>
+
+    <section *ngIf="activeTab === 'reports'" class="admin-panel">
+      <div class="report-row" *ngFor="let report of reports">
+        <p>
+          <strong>@{{ report.reporterUsername }}</strong> reported
+          <strong>@{{ report.reportedUsername }}</strong>
+        </p>
+        <p class="reason">{{ report.reason }}</p>
+        <small>{{ report.createdAt | date: 'medium' }} — {{ report.status }}</small>
+        <button *ngIf="report.status === 'PENDING'" (click)="resolveReport(report)">Resolve</button>
+      </div>
+    </section>
+  </main>
+</div>

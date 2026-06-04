@@ -11,8 +11,8 @@
       <div class="card post-card" *ngFor="let post of posts">
         <div class="post-header-row">
           <div class="user-meta">
-            <div class="avatar-placeholder">{{ post.author.username[0] | uppercase }}</div>
-            <span class="author-name">@{{ post.author.username }}</span>
+            <div class="avatar-placeholder">{{ postAuthorName(post)[0] | uppercase }}</div>
+            <span class="author-name">@{{ postAuthorName(post) }}</span>
           </div>
           <div class="post-actions" *ngIf="isAuthor(post)">
             <button (click)="startEdit(post)" class="icon-btn-sm" title="Edit">
@@ -163,12 +163,12 @@
         <div class="comments-scroll">
           <div class="comment-bubble" *ngFor="let comment of selectedPost.comments">
             <div class="comment-meta">
-              <strong>@{{ comment.author.username }}</strong>
+              <strong>@{{ commentAuthor(comment) }}</strong>
               <button class="delete-link" (click)="deleteComment(selectedPost!.id!, comment.id!)">
                 Delete
               </button>
             </div>
-            <p>{{ comment.text }}</p>
+            <p>{{ commentText(comment) }}</p>
             <span class="comment-date">{{ comment.createdAt | date: 'short' }}</span>
           </div>
         </div>

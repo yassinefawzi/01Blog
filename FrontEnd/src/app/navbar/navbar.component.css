@@ -30,3 +30,112 @@
 }
 
 .nav-actions { display: flex; gap: 1rem; align-items: center; }
+
+.notification-wrapper { position: relative; }
+
+.icon-btn {
+  position: relative;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  padding: 0.5rem;
+  color: var(--text-main);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.btn-primary {
+  border: none;
+  background: var(--accent);
+  color: #fff;
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.logout-link {
+  border: none;
+  background: transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+  font-size: 0.9rem;
+}
+
+.logout-link:hover {
+  color: var(--text-main);
+}
+
+.badge {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  background: #ef4444;
+  color: #fff;
+  font-size: 0.65rem;
+  border-radius: 999px;
+  padding: 0 5px;
+  min-width: 16px;
+}
+
+.notification-dropdown {
+  position: absolute;
+  right: 0;
+  top: calc(100% + 8px);
+  width: 320px;
+  max-height: 360px;
+  overflow-y: auto;
+  background: var(--card-bg, #fff);
+  border: 1px solid var(--border, #e5e7eb);
+  border-radius: 12px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+  z-index: 200;
+}
+
+.dropdown-header {
+  display: flex;
+  justify-content: space-between;
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid var(--border, #eee);
+  font-weight: 600;
+}
+
+.dropdown-header button {
+  border: none;
+  background: none;
+  color: #2563eb;
+  cursor: pointer;
+  font-size: 0.8rem;
+}
+
+.notification-item {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 0.75rem 1rem;
+  border: none;
+  border-bottom: 1px solid var(--border, #eee);
+  background: transparent;
+  cursor: pointer;
+}
+
+.notification-item.unread { background: rgba(37, 99, 235, 0.08); }
+
+.notification-item small { display: block; color: #888; margin-top: 0.25rem; }
+
+.empty { padding: 1rem; color: #888; text-align: center; }
+
+.admin-link,
+.messages-link {
+  color: #2563eb;
+  text-decoration: none;
+  font-weight: 600;
+  position: relative;
+}
+
+.badge.inline {
+  position: static;
+  margin-left: 4px;
+  display: inline-block;
+}

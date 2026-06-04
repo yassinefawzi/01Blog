@@ -1,4 +1,4 @@
-import { ChangeDetectorRef, Component, OnInit, inject } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit, OnDestroy, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { UserService } from '../services/user.service';
 import { AuthService } from '../services/auth.service';
@@ -10,6 +10,9 @@ import { User } from '../models/user.model';
 import { Post, Comment } from '../models/post.model';
 import { SideMenuComponent } from '../side-menu/side-menu.component';
 import { NavbarComponent } from '../navbar/navbar.component';
+import { ReportService } from '../services/report.service';
+import { WebsocketService } from '../services/websocket.service';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-profile',
@@ -18,7 +21,7 @@ import { NavbarComponent } from '../navbar/navbar.component';
   templateUrl: './profile.component.html',
   styleUrls: ['./profile.component.css'],
 })
-export class ProfileComponent implements OnInit {
+export class ProfileComponent implements OnInit, OnDestroy {
   private route = inject(ActivatedRoute);
   private router = inject(Router);
   private userService = inject(UserService);
@@ -26,8 +29,13 @@ export class ProfileComponent implements OnInit {
   private postService = inject(PostService);
   private themeService = inject(ThemeService);
   private cdr = inject(ChangeDetectorRef);
+  private reportService = inject(ReportService);
+  private websocketService = inject(WebsocketService);
+  private wsSub = new Subscription();
 
   user: User | null = null;
+  showReportModal = false;
+  reportReason = '';
   postCount: number = 0;
   followersCount: number = 0;
   followingCount: number = 0;
@@ -41,6 +49,11 @@ export class ProfileComponent implements OnInit {
   editContent: string = '';
 
   ngOnInit(): void {
+    this.wsSub.add(
+      this.websocketService.incomingComment$.subscribe(({ postId, comment }) => {
+        this.applyIncomingComment(postId, comment as Comment);
+      }),
+    );
     this.route.paramMap.subscribe(params => {
       const targetUser = params.get('username') || this.authService.getUsername();
       if (targetUser) {
@@ -137,14 +150,43 @@ export class ProfileComponent implements OnInit {
     this.cdr.detectChanges();
   }
 
+  ngOnDestroy(): void {
+    if (this.selectedPost?.id) {
+      this.websocketService.unsubscribeFromPostComments(this.selectedPost.id);
+    }
+    this.wsSub.unsubscribe();
+  }
+
   openComments(post: Post) {
     this.selectedPost = post;
+    if (post.id) {
+      this.websocketService.subscribeToPostComments(post.id);
+    }
     document.body.style.overflow = 'hidden';
   }
 
   closeComments() {
+    if (this.selectedPost?.id) {
+      this.websocketService.unsubscribeFromPostComments(this.selectedPost.id);
+    }
     this.selectedPost = null;
     document.body.style.overflow = 'auto';
+  }
+
+  private applyIncomingComment(postId: number, comment: Comment) {
+    this.userPosts = this.userPosts.map((p) => {
+      if (p.id !== postId || p.comments?.some((c) => c.id === comment.id)) return p;
+      const updated = {
+        ...p,
+        comments: [...(p.comments || []), comment],
+        commentCount: (p.commentCount || 0) + 1,
+      };
+      if (this.selectedPost?.id === postId) {
+        this.selectedPost = updated;
+      }
+      return updated;
+    });
+    this.cdr.detectChanges();
   }
 
   addComment(post: Post, input: HTMLInputElement) {
@@ -193,9 +235,50 @@ export class ProfileComponent implements OnInit {
 
   isCommentAuthor(comment: Comment): boolean {
     const currentUsername = this.authService.getUsername();
-    const authorName =
-      typeof comment.author === 'object' ? comment.author?.username : comment.author;
+    const authorName = this.commentAuthor(comment);
     return authorName === currentUsername;
+  }
+
+  commentAuthor(comment: Comment): string {
+    if (comment.authorName) return comment.authorName;
+    if (typeof comment.author === 'object' && comment.author?.username) {
+      return comment.author.username;
+    }
+    if (typeof comment.author === 'string') return comment.author;
+    return 'anonymous';
+  }
+
+  commentText(comment: Comment): string {
+    return comment.text || comment.content || '';
+  }
+
+  openReportModal() {
+    this.reportReason = '';
+    this.showReportModal = true;
+    document.body.style.overflow = 'hidden';
+  }
+
+  closeReportModal() {
+    this.showReportModal = false;
+    document.body.style.overflow = 'auto';
+  }
+
+  submitReport() {
+    const username = this.user?.username;
+    const reason = this.reportReason.trim();
+    if (!username || !reason) return;
+    if (!confirm('Submit this report to administrators?')) return;
+
+    this.reportService.reportUser(username, reason).subscribe({
+      next: () => {
+        alert('Report submitted. Thank you.');
+        this.closeReportModal();
+      },
+      error: (err) => {
+        console.error('Report failed', err);
+        alert(err.error?.message || 'Could not submit report.');
+      },
+    });
   }
 
   loadProfile(username: string) {

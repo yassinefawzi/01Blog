@@ -12,7 +12,7 @@ public interface PostRepository extends JpaRepository<Post, Long> {
 	@Query("SELECT DISTINCT p FROM Post p " +
 			"LEFT JOIN FETCH p.author " +
 			"LEFT JOIN FETCH p.comments " +
-			"WHERE p.author IN :authors " +
+			"WHERE p.author IN :authors AND p.hidden = false " +
 			"ORDER BY p.createdAt DESC")
 	List<Post> findFeedByAuthors(@Param("authors") Set<User> authors);
 
@@ -21,7 +21,9 @@ public interface PostRepository extends JpaRepository<Post, Long> {
 	@Query("SELECT DISTINCT p FROM Post p " +
 			"LEFT JOIN FETCH p.author " +
 			"LEFT JOIN FETCH p.comments " +
-			"WHERE p.author.username = :username " +
+			"WHERE p.author.username = :username AND p.hidden = false " +
 			"ORDER BY p.createdAt DESC")
 	List<Post> findProfilePostsByUsername(@Param("username") String username);
+
+	List<Post> findAllByOrderByCreatedAtDesc();
 }

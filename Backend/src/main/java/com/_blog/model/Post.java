@@ -40,6 +40,9 @@ public class Post {
     private String mediaUrl;
     private String mediaType;
 
+    @Column(nullable = false)
+    private boolean hidden = false;
+
     @JsonProperty("commentCount")
     public int getCommentCount() {
         return this.comments != null ? this.comments.size() : 0;

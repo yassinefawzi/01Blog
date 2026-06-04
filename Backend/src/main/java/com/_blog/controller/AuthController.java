@@ -40,6 +40,11 @@ public class AuthController {
 					.body(Map.of("message", "Invalid username or password"));
 		}
 
+		if (user.isBanned()) {
+			return ResponseEntity.status(HttpStatus.FORBIDDEN)
+					.body(Map.of("message", "Your account has been banned. Contact an administrator."));
+		}
+
 		List<String> roles = user.getRoles().stream()
 				.map(role -> role.getName())
 				.collect(Collectors.toList());

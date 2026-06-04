@@ -1,0 +1,70 @@
+<div class="messages-page">
+  <app-navbar></app-navbar>
+
+  <div class="messages-layout">
+    <aside class="conversations-panel">
+      <header>
+        <h2>Messages</h2>
+        <div class="new-chat">
+          <input
+            #newPartner
+            type="text"
+            placeholder="@username"
+            (keyup.enter)="startNewConversation(newPartner.value); newPartner.value = ''"
+          />
+        </div>
+      </header>
+
+      <p class="empty" *ngIf="conversations.length === 0">No conversations yet.</p>
+
+      <button
+        type="button"
+        class="conversation-item"
+        *ngFor="let c of conversations"
+        [class.active]="activePartner === c.partnerUsername"
+        (click)="openConversation(c.partnerUsername)"
+      >
+        <div class="conv-top">
+          <strong>@{{ c.partnerUsername }}</strong>
+          <span class="unread" *ngIf="c.unreadCount > 0">{{ c.unreadCount }}</span>
+        </div>
+        <p class="preview">{{ c.lastMessage }}</p>
+        <small>{{ c.lastMessageAt | date: 'short' }}</small>
+      </button>
+    </aside>
+
+    <section class="chat-panel" *ngIf="activePartner; else noChat">
+      <header class="chat-header">
+        <h3>@{{ activePartner }}</h3>
+      </header>
+
+      <div class="chat-messages">
+        <div
+          *ngFor="let msg of messages"
+          class="bubble"
+          [class.mine]="isMine(msg)"
+          [class.theirs]="!isMine(msg)"
+        >
+          <p>{{ msg.content }}</p>
+          <small>{{ msg.sentAt | date: 'short' }}</small>
+        </div>
+      </div>
+
+      <footer class="chat-input">
+        <input
+          type="text"
+          [(ngModel)]="newMessage"
+          placeholder="Type a message..."
+          (keyup.enter)="sendMessage()"
+        />
+        <button type="button" (click)="sendMessage()">Send</button>
+      </footer>
+    </section>
+
+    <ng-template #noChat>
+      <section class="chat-panel empty-chat">
+        <p>Select a conversation or enter a username to start chatting.</p>
+      </section>
+    </ng-template>
+  </div>
+</div>

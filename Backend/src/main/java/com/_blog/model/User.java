@@ -46,6 +46,10 @@ public class User {
     @Column
     private String city;
 
+    @Column(nullable = false)
+    @Builder.Default
+    private boolean banned = false;
+
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(name = "user_roles", joinColumns = @JoinColumn(name = "user_id"), inverseJoinColumns = @JoinColumn(name = "role_id"))
     @Builder.Default

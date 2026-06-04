@@ -1,6 +1,6 @@
 <nav class="nav-bar">
   <div class="nav-left">
-    <h2 class="nav-title">01<span>Blog</span></h2>
+    <h2 class="nav-title" routerLink="/home" style="cursor: pointer">01<span>Blog</span></h2>
   </div>
 
   <div class="nav-search">
@@ -27,20 +27,47 @@
   </div>
 
   <div class="nav-actions">
-    <button class="icon-btn" title="Notifications">
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        width="20"
-        height="20"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        stroke-width="2"
-      >
-        <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
-        <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
-      </svg>
-    </button>
+    <div class="notification-wrapper">
+      <button class="icon-btn" title="Notifications" (click)="toggleNotifications()">
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="20"
+          height="20"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+        >
+          <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
+          <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+        </svg>
+        <span class="badge" *ngIf="unreadCount > 0">{{ unreadCount }}</span>
+      </button>
+
+      <div class="notification-dropdown" *ngIf="showNotifications">
+        <div class="dropdown-header">
+          <span>Notifications</span>
+          <button type="button" (click)="markAllNotificationsRead()">Mark all read</button>
+        </div>
+        <p class="empty" *ngIf="notifications.length === 0">No notifications yet.</p>
+        <button
+          type="button"
+          class="notification-item"
+          *ngFor="let n of notifications"
+          [class.unread]="!n.read"
+          (click)="markNotificationRead(n)"
+        >
+          <span>{{ n.message }}</span>
+          <small>{{ n.createdAt | date: 'short' }}</small>
+        </button>
+      </div>
+    </div>
+
+    <a routerLink="/messages" class="messages-link">
+      Messages
+      <span class="badge inline" *ngIf="unreadMessages > 0">{{ unreadMessages }}</span>
+    </a>
+    <a *ngIf="isAdmin" routerLink="/admin" class="admin-link">Admin</a>
     <button class="btn-primary" (click)="openCreatePost()">
       <span>Create Post</span>
     </button>

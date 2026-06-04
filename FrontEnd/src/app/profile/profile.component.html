@@ -15,14 +15,17 @@
             {{ user.username[0].toUpperCase() }}
           </div>
           <h1 class="username">@{{ user.username }}</h1>
-          <button
-            *ngIf="!isOwnProfile"
-            class="follow-btn"
-            [class.following]="isFollowing"
-            (click)="toggleFollow()"
-          >
-            <span>{{ isFollowing ? 'Following' : 'Follow' }}</span>
-          </button>
+          <div class="profile-actions" *ngIf="!isOwnProfile">
+            <button
+              class="follow-btn"
+              [class.following]="isFollowing"
+              (click)="toggleFollow()"
+            >
+              <span>{{ isFollowing ? 'Following' : 'Follow' }}</span>
+            </button>
+            <button class="report-btn" (click)="openReportModal()">Report user</button>
+            <a class="message-link" [routerLink]="['/messages', user.username]">Send message</a>
+          </div>
 
           <div class="stats-bar">
             <div class="stat-item">
@@ -275,7 +278,7 @@
           <div class="comment-item" *ngFor="let comment of selectedPost.comments">
             <div class="comment-user-meta">
               <div>
-                <span class="comment-author">@{{ comment.author || 'anonymous' }}</span>
+                <span class="comment-author">@{{ commentAuthor(comment) }}</span>
                 <span class="comment-time">{{ comment.createdAt | date: 'short' }}</span>
               </div>
 
@@ -301,7 +304,7 @@
                 </svg>
               </button>
             </div>
-            <p class="comment-body-text">{{ comment.text }}</p>
+            <p class="comment-body-text">{{ commentText(comment) }}</p>
           </div>
 
           <div
@@ -321,6 +324,24 @@
           />
           <button (click)="addComment(selectedPost, commentInput)">Send</button>
         </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="report-overlay" *ngIf="showReportModal" (click)="closeReportModal()">
+    <div class="report-modal" (click)="$event.stopPropagation()">
+      <h3>Report @{{ user?.username }}</h3>
+      <p>Describe why this profile should be reviewed by an administrator.</p>
+      <textarea
+        [(ngModel)]="reportReason"
+        rows="4"
+        placeholder="Reason for report..."
+      ></textarea>
+      <div class="report-actions">
+        <button type="button" (click)="closeReportModal()">Cancel</button>
+        <button type="button" class="danger" (click)="submitReport()" [disabled]="!reportReason.trim()">
+          Submit report
+        </button>
       </div>
     </div>
   </div>

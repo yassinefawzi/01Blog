@@ -1,4 +1,4 @@
-import { Component, OnInit, ChangeDetectorRef, inject, PLATFORM_ID } from '@angular/core';
+import { Component, OnInit, OnDestroy, ChangeDetectorRef, inject, PLATFORM_ID } from '@angular/core';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
@@ -8,6 +8,8 @@ import { AuthService } from '../services/auth.service';
 import { NavbarComponent } from '../navbar/navbar.component';
 import { SideMenuComponent } from '../side-menu/side-menu.component';
 import { ThemeService } from '../services/themeService';
+import { WebsocketService } from '../services/websocket.service';
+import { Subscription } from 'rxjs';
 @Component({
   selector: 'app-home',
   standalone: true,
@@ -15,9 +17,11 @@ import { ThemeService } from '../services/themeService';
   templateUrl: './home.component.html',
   styleUrls: ['./home.component.css'],
 })
-export class HomeComponent implements OnInit {
+export class HomeComponent implements OnInit, OnDestroy {
   private themeService = inject(ThemeService);
   private platformId = inject(PLATFORM_ID);
+  private websocketService = inject(WebsocketService);
+  private wsSub = new Subscription();
   activeCategory: string = 'All';
   searchQuery: string = '';
   posts: Post[] = [];
@@ -35,6 +39,18 @@ export class HomeComponent implements OnInit {
     if (isPlatformBrowser(this.platformId)) {
       this.fetchPosts();
     }
+    this.wsSub.add(
+      this.websocketService.incomingComment$.subscribe(({ postId, comment }) => {
+        this.applyIncomingComment(postId, comment as Comment);
+      }),
+    );
+  }
+
+  ngOnDestroy(): void {
+    if (this.selectedPost?.id) {
+      this.websocketService.unsubscribeFromPostComments(this.selectedPost.id);
+    }
+    this.wsSub.unsubscribe();
   }
 
   onPostAdded(newPost: Post) {
@@ -153,10 +169,16 @@ export class HomeComponent implements OnInit {
 
   openComments(post: Post) {
     this.selectedPost = post;
+    if (post.id) {
+      this.websocketService.subscribeToPostComments(post.id);
+    }
     document.body.style.overflow = 'hidden';
   }
 
   closeComments() {
+    if (this.selectedPost?.id) {
+      this.websocketService.unsubscribeFromPostComments(this.selectedPost.id);
+    }
     this.selectedPost = null;
     document.body.style.overflow = 'auto';
   }
@@ -227,5 +249,42 @@ export class HomeComponent implements OnInit {
 
   onSearch() {
     console.log('Searching for:', this.searchQuery);
+  }
+
+  postAuthorName(post: Post): string {
+    if (typeof post.author === 'object' && post.author?.username) {
+      return post.author.username;
+    }
+    return (post as any).authorName || 'unknown';
+  }
+
+  commentAuthor(comment: Comment): string {
+    if (comment.authorName) return comment.authorName;
+    if (typeof comment.author === 'object' && comment.author?.username) {
+      return comment.author.username;
+    }
+    if (typeof comment.author === 'string') return comment.author;
+    return 'anonymous';
+  }
+
+  commentText(comment: Comment): string {
+    return comment.text || comment.content || '';
+  }
+
+  private applyIncomingComment(postId: number, comment: Comment) {
+    const exists = (p: Post) => p.comments?.some((c) => c.id === comment.id);
+    this.posts = this.posts.map((p) => {
+      if (p.id !== postId || exists(p)) return p;
+      const updated = {
+        ...p,
+        comments: [...(p.comments || []), comment],
+        commentCount: (p.commentCount || 0) + 1,
+      };
+      if (this.selectedPost?.id === postId) {
+        this.selectedPost = updated;
+      }
+      return updated;
+    });
+    this.cdr.detectChanges();
   }
 }

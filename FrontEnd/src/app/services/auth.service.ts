@@ -3,6 +3,7 @@ import { isPlatformBrowser } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { BehaviorSubject, Observable, tap, catchError, of, finalize } from 'rxjs';
+import { WebsocketService } from './websocket.service';
 
 @Injectable({
   providedIn: 'root',
@@ -16,6 +17,7 @@ export class AuthService {
 
   private http = inject(HttpClient);
   private platformId = inject(PLATFORM_ID);
+  private websocketService = inject(WebsocketService);
 
   private isLoadingSubject = new BehaviorSubject<boolean>(true);
   public isLoading$ = this.isLoadingSubject.asObservable();
@@ -45,6 +47,7 @@ export class AuthService {
     }
   }
   private logoutLocal() {
+    this.websocketService.disconnect();
     if (isPlatformBrowser(this.platformId)) {
       localStorage.removeItem('user');
     }
@@ -69,6 +72,9 @@ export class AuthService {
             localStorage.setItem('user', JSON.stringify(user));
           }
           this.currentUserSubject.next(user);
+          if (user?.token) {
+            this.websocketService.connect(user.token);
+          }
           this.router.navigate(['/home']);
         }),
       );
@@ -103,6 +109,9 @@ export class AuthService {
           localStorage.setItem('user', JSON.stringify(user));
         }
         this.currentUserSubject.next(user);
+        if (user?.token) {
+          this.websocketService.connect(user.token);
+        }
       }),
       catchError(() => {
         this.logoutLocal();
@@ -130,5 +139,15 @@ export class AuthService {
 
   isLoggedIn(): boolean {
     return this.currentUserSubject.value !== null;
+  }
+
+  isAdmin(): boolean {
+    const user = this.currentUserSubject.value;
+    return Array.isArray(user?.roles) && user.roles.includes('ROLE_ADMIN');
+  }
+
+  getRoles(): string[] {
+    const user = this.currentUserSubject.value;
+    return user?.roles || [];
   }
 }

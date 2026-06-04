@@ -3,9 +3,11 @@ import { User } from './user.model';
 
 export interface Comment {
   id?: number;
-  author: User;
-  text: string;
-  createdAt?: Date;
+  author?: User | string;
+  authorName?: string;
+  text?: string;
+  content?: string;
+  createdAt?: Date | string;
 }
 
 export interface Post {

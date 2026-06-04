@@ -36,9 +36,12 @@ export class PostService {
   }
 
   addComment(postId: number, comment: Partial<Comment>): Observable<Comment> {
-    return this.http.post<Comment>(`${this.apiUrl}/${postId}/comments`, comment, {
-      withCredentials: true,
-    });
+    const text = comment.text || comment.content || '';
+    return this.http.post<Comment>(
+      `${this.apiUrl}/${postId}/comments`,
+      { text, content: text },
+      { withCredentials: true },
+    );
   }
 
   deleteComment(postId: number, commentId: number): Observable<void> {
