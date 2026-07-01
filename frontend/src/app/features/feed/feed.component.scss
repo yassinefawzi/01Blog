@@ -1,0 +1,10 @@
+.load-more {
+  display: flex;
+  justify-content: center;
+  padding: 1.5rem 0 0.5rem;
+
+  button {
+    min-width: 160px;
+    height: 44px;
+  }
+}

@@ -1,0 +1,92 @@
+<div class="page-shell">
+  <div class="page-container">
+    @if (loading()) {
+      <div class="loading-center"><mat-spinner diameter="44"></mat-spinner></div>
+    } @else {
+      @if (displayUser(); as u) {
+        <div class="profile-hero surface-card">
+          <div class="hero-banner"></div>
+          <div class="profile-body">
+            <div class="avatar-wrap">
+              @if (u.avatarUrl) {
+                <img [src]="u.avatarUrl" alt="" class="avatar" />
+              } @else {
+                <div class="avatar placeholder">{{ u.username[0] | uppercase }}</div>
+              }
+              @if (u.ownProfile) {
+                <input type="file" #avatarInput hidden accept="image/*" (change)="onAvatarChange($event)" />
+                <button mat-mini-fab color="primary" (click)="avatarInput.click()" class="avatar-edit" aria-label="Change avatar">
+                  <mat-icon>photo_camera</mat-icon>
+                </button>
+              }
+            </div>
+            <div class="profile-details">
+              <h1>{{ u.username }}</h1>
+              @if (u.bio) {
+                <p class="bio">{{ u.bio }}</p>
+              } @else if (u.ownProfile) {
+                <p class="bio placeholder-bio">Add a bio to tell others about yourself</p>
+              }
+              <div class="stats">
+                <button type="button" class="stat stat-btn" [class.active]="isStatActive('followers')"
+                        (click)="showConnections('followers')">
+                  <strong>{{ u.followersCount }}</strong><span>Followers</span>
+                </button>
+                <button type="button" class="stat stat-btn" [class.active]="isStatActive('following')"
+                        (click)="showConnections('following')">
+                  <strong>{{ u.followingCount }}</strong><span>Following</span>
+                </button>
+                <div class="stat"><strong>{{ u.postCount }}</strong><span>Posts</span></div>
+              </div>
+              @if (!u.ownProfile) {
+                <div class="actions">
+                  <button mat-flat-button [color]="u.subscribed ? undefined : 'primary'" class="btn-pill"
+                          (click)="toggleSubscribe()">
+                    <mat-icon>{{ u.subscribed ? 'person_remove' : 'person_add' }}</mat-icon>
+                    {{ u.subscribed ? 'Unsubscribe' : 'Subscribe' }}
+                  </button>
+                  <button mat-stroked-button class="btn-pill" (click)="reportUser()">
+                    <mat-icon>flag</mat-icon> Report
+                  </button>
+                </div>
+              }
+            </div>
+          </div>
+        </div>
+
+        @if (showConnectionsBlock()) {
+          <div id="connections-block" class="connections-panel">
+            <div class="connections-panel-header">
+              <span>{{ connectionsTab() === 'followers' ? 'Followers' : 'Following' }}</span>
+              <button type="button" mat-icon-button (click)="hideConnections()" aria-label="Close">
+                <mat-icon>close</mat-icon>
+              </button>
+            </div>
+            <app-connections-block
+              [username]="u.username"
+              [activeTab]="connectionsTab()"
+              [listRefreshKey]="connectionsListRefresh()" />
+          </div>
+        }
+
+        <header class="section-header">
+          <h2>Posts</h2>
+          <span class="count">{{ u.postCount }}</span>
+        </header>
+
+        @for (post of posts(); track post.id) {
+          <app-post-card [post]="post" (postDeleted)="onPostDeleted($event)" />
+        } @empty {
+          <div class="state-box">
+            <mat-icon>article</mat-icon>
+            <h3>No posts yet</h3>
+            <p>@if (u.ownProfile) { Share your first story with the community. } @else { This user hasn't posted anything yet. }</p>
+            @if (u.ownProfile) {
+              <a mat-flat-button color="primary" routerLink="/create" class="btn-pill">Write a post</a>
+            }
+          </div>
+        }
+      }
+    }
+  </div>
+</div>

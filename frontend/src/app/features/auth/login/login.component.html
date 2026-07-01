@@ -1,0 +1,49 @@
+<div class="auth-page">
+  <div class="auth-visual hide-mobile">
+    <div class="visual-content">
+      <div class="visual-badge">Student blogging, reimagined</div>
+      <h2>Share ideas.<br/>Grow together.</h2>
+      <p>Join 01Blog — the learning-focused social platform where students publish posts, follow peers, and build community.</p>
+      <div class="feature-list">
+        <div class="feature"><mat-icon>edit_note</mat-icon> Rich posts with media</div>
+        <div class="feature"><mat-icon>groups</mat-icon> Follow & subscribe</div>
+        <div class="feature"><mat-icon>notifications</mat-icon> Real-time updates</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="auth-form-side">
+    <mat-card class="auth-card surface-card">
+      <div class="auth-logo hide-desktop">
+        <span class="logo-icon">01</span>
+        <span>01Blog</span>
+      </div>
+      <mat-card-header>
+        <mat-card-title>Welcome back</mat-card-title>
+        <mat-card-subtitle>Sign in to your account</mat-card-subtitle>
+      </mat-card-header>
+      <mat-card-content>
+        <form [formGroup]="form" (ngSubmit)="submit()">
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Username</mat-label>
+            <mat-icon matPrefix>person_outline</mat-icon>
+            <input matInput formControlName="username" autocomplete="username" />
+          </mat-form-field>
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Password</mat-label>
+            <mat-icon matPrefix>lock_outline</mat-icon>
+            <input matInput type="password" formControlName="password" autocomplete="current-password" />
+          </mat-form-field>
+          <button mat-flat-button color="primary" type="submit" class="full-width btn-pill submit-btn"
+                  [disabled]="loading || form.invalid">
+            @if (loading) { Signing in... } @else { Sign In }
+          </button>
+        </form>
+      </mat-card-content>
+      <div class="auth-footer">
+        <span class="switch-text">Don't have an account?</span>
+        <a routerLink="/register" class="switch-link">Create one free</a>
+      </div>
+    </mat-card>
+  </div>
+</div>

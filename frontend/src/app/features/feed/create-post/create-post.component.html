@@ -1,0 +1,48 @@
+<div class="page-shell">
+  <div class="page-container">
+    <header class="page-header">
+      <h1>Create Post</h1>
+      <p class="subtitle">Share your thoughts, ideas, or projects with the community</p>
+    </header>
+
+    <mat-card class="create-card surface-card">
+      <mat-card-content>
+        <form [formGroup]="form" (ngSubmit)="submit()">
+          <mat-form-field appearance="outline" class="full-width content-field">
+            <mat-label>What's on your mind?</mat-label>
+            <textarea matInput rows="7" formControlName="description" placeholder="Write something inspiring..."></textarea>
+          </mat-form-field>
+
+          <div class="upload-zone" (click)="fileInput.click()" [class.has-file]="previewUrl">
+            <input type="file" #fileInput hidden accept="image/*,video/*" (change)="onFileSelected($event)" />
+            @if (uploading) {
+              <mat-spinner diameter="32"></mat-spinner>
+              <span>Uploading...</span>
+            } @else if (previewUrl) {
+              @if (mediaType === 'IMAGE') {
+                <img [src]="previewUrl" alt="Preview" class="preview-media" />
+              } @else if (mediaType === 'VIDEO') {
+                <video [src]="previewUrl" controls class="preview-media"></video>
+              }
+              <button mat-stroked-button type="button" class="btn-pill change-media" (click)="fileInput.click(); $event.stopPropagation()">
+                Change media
+              </button>
+            } @else {
+              <mat-icon>cloud_upload</mat-icon>
+              <strong>Add photo or video</strong>
+              <span>Click to browse · JPG, PNG, MP4</span>
+            }
+          </div>
+
+          <div class="form-actions">
+            <a mat-stroked-button routerLink="/feed" class="btn-pill">Cancel</a>
+            <button mat-flat-button color="primary" type="submit" class="btn-pill publish-btn"
+                    [disabled]="submitting || uploading || form.invalid">
+              @if (submitting) { Publishing... } @else { Publish Post }
+            </button>
+          </div>
+        </form>
+      </mat-card-content>
+    </mat-card>
+  </div>
+</div>

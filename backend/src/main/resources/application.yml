@@ -1,0 +1,41 @@
+spring:
+  application:
+    name: blog01-backend
+  datasource:
+    url: jdbc:postgresql://localhost:5434/blog01
+    username: ${DB_USERNAME:blog01}
+    password: ${DB_PASSWORD:blog01_secret}
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: false
+    properties:
+      hibernate:
+        format_sql: true
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+  servlet:
+    multipart:
+      max-file-size: 50MB
+      max-request-size: 50MB
+
+server:
+  port: ${SERVER_PORT:8080}
+  servlet:
+    context-path: /api
+
+app:
+  jwt:
+    secret: ${JWT_SECRET:01BlogSuperSecretKeyForJWTTokenGenerationMustBe256BitsLong!!}
+    expiration-ms: ${JWT_EXPIRATION_MS:86400000}
+  cors:
+    allowed-origins: ${CORS_ORIGINS:http://localhost:4200}
+  storage:
+    type: ${STORAGE_TYPE:local}
+    local:
+      upload-dir: ${UPLOAD_DIR:uploads}
+      base-url: ${STORAGE_BASE_URL:http://localhost:8080/api/files}
+
+logging:
+  level:
+    com.blog01: INFO

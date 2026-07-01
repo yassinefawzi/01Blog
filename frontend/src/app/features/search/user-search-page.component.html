@@ -1,0 +1,48 @@
+<div class="page-shell">
+  <div class="page-container">
+    <header class="page-header">
+      <h1>Find Students</h1>
+      <p class="subtitle">Search by username to discover and follow other bloggers</p>
+    </header>
+
+    <div class="search-page-bar">
+      <app-user-search />
+    </div>
+
+    @if (query().length < 2) {
+      <div class="state-box">
+        <mat-icon>person_search</mat-icon>
+        <h3>Search for students</h3>
+        <p>Type at least 2 characters to find users on 01Blog.</p>
+      </div>
+    } @else if (loading()) {
+      <div class="loading-center"><mat-spinner diameter="44"></mat-spinner></div>
+    } @else {
+      <p class="results-count">{{ displayResults().length }} result(s) for "{{ query() }}"</p>
+
+      @for (user of displayResults(); track user.id) {
+        <a class="user-card surface-card" [routerLink]="['/profile', user.username]">
+          @if (user.avatarUrl) {
+            <img [src]="user.avatarUrl" alt="" class="avatar" />
+          } @else {
+            <span class="avatar placeholder">{{ user.username[0] | uppercase }}</span>
+          }
+          <div class="user-info">
+            <strong>{{ user.username }}</strong>
+            @if (user.bio) {
+              <p class="bio">{{ user.bio }}</p>
+            }
+            <span class="stats">{{ user.followersCount }} followers · {{ user.followingCount }} following</span>
+          </div>
+          <button mat-stroked-button class="btn-pill view-btn">View profile</button>
+        </a>
+      } @empty {
+        <div class="state-box">
+          <mat-icon>search_off</mat-icon>
+          <h3>No users found</h3>
+          <p>Try a different username or check your spelling.</p>
+        </div>
+      }
+    }
+  </div>
+</div>

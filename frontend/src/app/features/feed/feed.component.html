@@ -1,0 +1,39 @@
+<div class="page-shell">
+  <div class="page-container">
+    <header class="page-header">
+      <h1>Your Feed</h1>
+      <p class="subtitle">Latest posts from people you follow</p>
+    </header>
+
+    @if (loading()) {
+      <div class="loading-center"><mat-spinner diameter="44"></mat-spinner></div>
+    } @else {
+      @for (post of posts(); track post.id) {
+        <app-post-card
+          [post]="post"
+          (postUpdated)="onPostUpdated($event)"
+          (postDeleted)="onPostDeleted($event)"
+        />
+      } @empty {
+        <div class="state-box">
+          <mat-icon>explore</mat-icon>
+          <h3>Your feed is empty</h3>
+          <p>Follow other students to see their posts here, or share your first story with the community.</p>
+          <a mat-flat-button color="primary" routerLink="/create" class="btn-pill">Create a post</a>
+        </div>
+      }
+
+      @if (!last && posts().length > 0) {
+        <div class="load-more">
+          <button mat-stroked-button class="btn-pill" (click)="loadMore()" [disabled]="loadingMore()">
+            @if (loadingMore()) {
+              <mat-spinner diameter="20"></mat-spinner>
+            } @else {
+              Load more posts
+            }
+          </button>
+        </div>
+      }
+    }
+  </div>
+</div>

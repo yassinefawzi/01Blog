@@ -1,0 +1,15 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: blog01-postgres
+    environment:
+      POSTGRES_DB: blog01
+      POSTGRES_USER: blog01
+      POSTGRES_PASSWORD: blog01_secret
+    ports:
+      - "5434:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+volumes:
+  postgres_data:

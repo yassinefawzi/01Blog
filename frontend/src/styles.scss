@@ -1,0 +1,191 @@
+@use './styles/theme';
+@use './styles/tokens';
+
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400&display=swap');
+
+html, body {
+  height: 100%;
+  margin: 0;
+  font-family: var(--font-sans);
+  color: var(--color-text);
+  background: var(--gradient-mesh);
+  background-attachment: fixed;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+a {
+  color: var(--color-primary);
+  text-decoration: none;
+  transition: color var(--transition);
+
+  &:hover {
+    color: var(--color-primary-light);
+  }
+}
+
+// ── Layout utilities ──
+
+.page-shell {
+  min-height: calc(100vh - var(--nav-height));
+  padding: 2rem 1.25rem 3rem;
+}
+
+.page-container {
+  max-width: var(--page-max-width);
+  margin: 0 auto;
+}
+
+.page-container--wide {
+  max-width: var(--admin-max-width);
+}
+
+.page-header {
+  margin-bottom: 2rem;
+
+  h1 {
+    margin: 0 0 0.35rem;
+    font-size: clamp(1.75rem, 4vw, 2.25rem);
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    background: var(--gradient-brand);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  .subtitle {
+    margin: 0;
+    color: var(--color-text-muted);
+    font-size: 1rem;
+    line-height: 1.5;
+  }
+}
+
+// ── Surface cards ──
+
+.surface-card {
+  background: var(--color-bg-elevated) !important;
+  border: 1px solid var(--color-border) !important;
+  border-radius: var(--radius-md) !important;
+  box-shadow: var(--shadow-card) !important;
+  overflow: hidden;
+  transition: box-shadow var(--transition), transform var(--transition);
+
+  &:hover {
+    box-shadow: var(--shadow-md) !important;
+  }
+}
+
+// ── Buttons & chips ──
+
+.btn-pill {
+  border-radius: var(--radius-full) !important;
+  font-weight: 600 !important;
+  letter-spacing: -0.01em;
+}
+
+.nav-pill {
+  border-radius: var(--radius-full) !important;
+  font-weight: 600 !important;
+  font-size: 0.875rem !important;
+  padding: 0 1rem !important;
+  min-height: 40px !important;
+  transition: background var(--transition), color var(--transition) !important;
+
+  &.active,
+  &.mdc-button--active {
+    background: var(--color-primary-soft) !important;
+    color: var(--color-primary) !important;
+  }
+}
+
+// ── Empty & loading states ──
+
+.state-box {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  padding: 3.5rem 2rem;
+  text-align: center;
+  background: var(--color-bg-elevated);
+  border: 1px dashed var(--color-border-strong);
+  border-radius: var(--radius-md);
+
+  mat-icon {
+    font-size: 48px;
+    width: 48px;
+    height: 48px;
+    color: var(--color-primary-light);
+    opacity: 0.85;
+  }
+
+  h3 {
+    margin: 0;
+    font-size: 1.125rem;
+    font-weight: 700;
+  }
+
+  p {
+    margin: 0;
+    color: var(--color-text-muted);
+    max-width: 320px;
+    line-height: 1.6;
+  }
+}
+
+.loading-center {
+  display: flex;
+  justify-content: center;
+  padding: 4rem;
+}
+
+// ── Material overrides ──
+
+.mat-mdc-form-field {
+  width: 100%;
+}
+
+.mat-mdc-raised-button.mat-primary {
+  border-radius: var(--radius-full) !important;
+  font-weight: 600 !important;
+  padding: 0 1.5rem !important;
+  box-shadow: 0 4px 14px rgba(109, 40, 217, 0.35) !important;
+}
+
+.mat-mdc-outlined-button,
+.mat-mdc-stroked-button {
+  border-radius: var(--radius-full) !important;
+  font-weight: 600 !important;
+}
+
+.mat-mdc-tab-group {
+  background: var(--color-bg-elevated);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+}
+
+// ── Responsive ──
+
+@media (max-width: 640px) {
+  .page-shell {
+    padding: 1.25rem 1rem 2rem;
+  }
+
+  .hide-mobile {
+    display: none !important;
+  }
+}
+
+@media (min-width: 641px) {
+  .hide-desktop {
+    display: none !important;
+  }
+}

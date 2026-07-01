@@ -1,0 +1,38 @@
+<div class="connections-block surface-card">
+  <div class="tabs">
+    <button type="button" class="tab" [class.active]="tab() === 'followers'" (click)="selectTab('followers')">
+      <mat-icon>group</mat-icon> Followers
+    </button>
+    <button type="button" class="tab" [class.active]="tab() === 'following'" (click)="selectTab('following')">
+      <mat-icon>person_add</mat-icon> Following
+    </button>
+  </div>
+
+  @if (loading()) {
+    <div class="loading"><mat-spinner diameter="28"></mat-spinner></div>
+  } @else {
+    <ul class="user-list">
+      @for (person of currentList(); track person.id) {
+        <li>
+          <a [routerLink]="['/profile', person.username]" class="user-row">
+            @if (person.avatarUrl) {
+              <img [src]="person.avatarUrl" alt="" class="avatar" />
+            } @else {
+              <span class="avatar placeholder">{{ person.username[0] | uppercase }}</span>
+            }
+            <span class="username">{{ person.username }}</span>
+            <mat-icon class="arrow">chevron_right</mat-icon>
+          </a>
+        </li>
+      } @empty {
+        <li class="empty">
+          @if (tab() === 'followers') {
+            No followers yet
+          } @else {
+            Not following anyone yet
+          }
+        </li>
+      }
+    </ul>
+  }
+</div>

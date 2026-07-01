@@ -1,0 +1,18 @@
+@use '@angular/material' as mat;
+
+html {
+  color-scheme: light;
+
+  @include mat.theme((
+    color: (
+      theme-type: light,
+      primary: mat.$violet-palette,
+      tertiary: mat.$rose-palette,
+    ),
+    typography: (
+      plain-family: 'Plus Jakarta Sans',
+      brand-family: 'Plus Jakarta Sans',
+    ),
+    density: 0,
+  ));
+}

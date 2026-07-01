@@ -1,119 +1,190 @@
-# 01Blog
+# 01Blog — Social Learning Platform
 
-01Blog is a full-stack social blogging platform where students share learning experiences, follow each other, interact with posts, and report inappropriate content. Administrators moderate users, posts, and reports.
+A fullstack social blogging platform where students share posts, follow each other, interact through likes and comments, receive notifications, and report inappropriate content. Admins manage users, posts, and reports through a secure dashboard.
+
+## Architecture Overview
+
+```
+┌─────────────────┐     REST + WebSocket      ┌──────────────────────────────┐
+│  Angular 19     │ ◄──────────────────────► │  Spring Boot 3 REST API       │
+│  (Material UI)  │     JWT Bearer Auth       │  Spring Security + JWT        │
+└─────────────────┘                           └──────────────┬───────────────┘
+                                                             │
+                                                    ┌────────▼────────┐
+                                                    │  PostgreSQL 16   │
+                                                    └─────────────────┘
+```
+
+### Backend layers
+- **Controllers** — REST endpoints (`/auth`, `/posts`, `/users`, `/admin`, …)
+- **Services** — business logic
+- **Repositories** — Spring Data JPA
+- **Entities** — JPA domain model
+- **DTOs** — request/response objects
+- **Security** — JWT filter, BCrypt, role-based access (`USER`, `ADMIN`)
+
+### Frontend modules
+- **auth** — login, register
+- **feed** — home feed, create post (infinite scroll)
+- **profile** — user blocks, subscribe/unsubscribe
+- **notifications** — dropdown in navbar
+- **admin** — dashboard with stats, user/report management
+- **shared** — post card, report dialog
 
 ## Technologies
 
-| Layer | Stack |
-|-------|--------|
-| Backend | Java 17, Spring Boot 3.4, Spring Security, JWT, Spring Data JPA |
-| Frontend | Angular 21, TypeScript, standalone components |
-| Database | MySQL 8 |
-| Media | Local filesystem (`uploads/`) |
-
-## Features
-
-- User registration and login with JWT and role-based access (`ROLE_USER`, `ROLE_ADMIN`)
-- Public profile pages with post CRUD on your own block
-- Follow / unfollow users and a home feed from followed accounts
-- Posts with text, optional image/video upload, likes, and comments
-- Notifications when followed users publish posts (REST + WebSocket push)
-- **Private messaging** with real-time delivery over WebSocket (STOMP)
-- Live comment updates on open post threads via WebSocket
-- User reports (reason + timestamp), visible to admins only
-- Admin dashboard: manage users (ban/delete), posts (hide/delete), and reports
+| Layer    | Stack |
+|----------|-------|
+| Backend  | Java 21, Spring Boot 3.3, Spring Security, JWT (jjwt), JPA, PostgreSQL, WebSocket (STOMP) |
+| Frontend | Angular 19, Angular Material, RxJS, SockJS/STOMP |
+| DevOps   | Docker Compose (PostgreSQL), Maven, npm |
 
 ## Prerequisites
 
-- Java 17+
+- Java 21+
+- Maven 3.8+
 - Node.js 20+ and npm
-- Docker (optional, for MySQL + backend container)
+- Docker & Docker Compose (for PostgreSQL)
 
-## Quick start with Docker
+## Quick Start
+
+### 1. Start PostgreSQL
 
 ```bash
-cd Backend
-docker compose up --build
+docker compose up -d
 ```
 
-MySQL runs on port **3307**. The API runs on **http://localhost:8080**.
+PostgreSQL runs on **port 5434** (to avoid conflict with other local Postgres instances on 5432/5433).
 
-## Run backend locally
-
-1. Start MySQL (or use Docker only for the database):
+### 2. Run the backend
 
 ```bash
-cd Backend
-docker compose up mysql-db -d
+cd backend
+mvn spring-boot:run
 ```
 
-2. Run the Spring Boot app:
+API base URL: `http://localhost:8080/api`
+
+Default admin account (created on first startup):
+- **Username:** `admin`
+- **Password:** `admin123`
+
+### 3. Run the frontend
 
 ```bash
-cd Backend
-./mvnw spring-boot:run
-```
-
-Default datasource (see `application.properties`):
-
-- URL: `jdbc:mysql://localhost:3307/blogdb`
-- User: `bloguser`
-- Password: `blogpass`
-
-The first registered user receives the **admin** role automatically.
-
-## Run frontend
-
-```bash
-cd FrontEnd
+cd frontend
 npm install
 npm start
 ```
 
-Open **http://localhost:4200**. The app calls the API at `http://localhost:8080`.
+App URL: `http://localhost:4200`
 
-## API overview
+## Environment Variables
 
-| Area | Base path |
-|------|-----------|
-| Auth | `/api/auth` (login, logout, me) |
-| Users | `/api/users` (register, profile, follow) |
-| Posts | `/api/posts` (CRUD, feed, likes, comments) |
-| Notifications | `/api/notifications` |
-| Reports | `/api/reports` |
-| Admin | `/api/admin` (requires `ROLE_ADMIN`) |
-| Messages | `/api/messages` (conversations, history, send) |
-| WebSocket | `ws://localhost:8080/ws` (STOMP, JWT in connect headers) |
+### Backend (`application.yml` or env vars)
 
-### WebSocket destinations
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `DB_USERNAME` | `blog01` | PostgreSQL username |
+| `DB_PASSWORD` | `blog01_secret` | PostgreSQL password |
+| `SERVER_PORT` | `8080` | API port |
+| `JWT_SECRET` | (see yml) | JWT signing key (min 256 bits) |
+| `JWT_EXPIRATION_MS` | `86400000` | Token TTL (24h) |
+| `CORS_ORIGINS` | `http://localhost:4200` | Allowed CORS origins |
+| `UPLOAD_DIR` | `uploads` | Local media storage path |
+| `STORAGE_BASE_URL` | `http://localhost:8080/api/files` | Public URL prefix for uploads |
+| `STORAGE_TYPE` | `local` | `local` (S3-ready interface available) |
 
-| Destination | Purpose |
-|-------------|---------|
-| `/app/chat.send` | Send a private message |
-| `/user/queue/messages` | Receive private messages |
-| `/user/queue/notifications` | Receive notification pushes |
-| `/topic/post.{id}.comments` | Live comments on a post |
+### Frontend (`src/environments/environment.ts`)
 
-## Project structure
+| Key | Default | Description |
+|-----|---------|-------------|
+| `apiUrl` | `http://localhost:8080/api` | Backend REST base URL |
+| `wsUrl` | `http://localhost:8080/api/ws` | WebSocket endpoint |
+
+## API Endpoints
+
+### Public
+| Method | Path | Description |
+|--------|------|-------------|
+| POST | `/auth/register` | Register |
+| POST | `/auth/login` | Login (returns JWT) |
+| GET | `/files/{filename}` | Serve uploaded media |
+
+### Authenticated (USER)
+| Method | Path | Description |
+|--------|------|-------------|
+| GET | `/posts/feed` | Subscribed users' feed |
+| POST | `/posts` | Create post |
+| PUT/DELETE | `/posts/{id}` | Edit/delete own post |
+| POST | `/posts/{id}/likes` | Toggle like |
+| GET/POST | `/posts/{id}/comments` | Comments |
+| GET | `/users/{username}` | Profile |
+| POST | `/subscriptions/{username}` | Follow/unfollow |
+| GET | `/notifications` | Notifications |
+| POST | `/reports` | Report user/post |
+| POST | `/files/upload` | Upload media |
+
+### Admin only
+| Method | Path | Description |
+|--------|------|-------------|
+| GET | `/admin/stats` | Dashboard analytics |
+| GET | `/admin/users` | List users |
+| PATCH | `/admin/users/{id}/ban` | Ban/unban |
+| DELETE | `/admin/users/{id}` | Delete user |
+| DELETE | `/admin/posts/{id}` | Delete post |
+| GET/PATCH | `/admin/reports` | Review reports |
+
+## Database Schema
+
+- **users** — accounts, roles, profiles
+- **posts** — blog posts with optional media
+- **comments** — post comments
+- **likes** — unique (post, user) pairs
+- **subscriptions** — follower/following relationships
+- **notifications** — in-app alerts
+- **reports** — moderation queue
+
+Schema is auto-generated via Hibernate `ddl-auto: update`.
+
+## Project Structure
 
 ```
-01Blog/
-├── Backend/          # Spring Boot REST API
-├── FrontEnd/         # Angular SPA
+blog01/
+├── backend/                 # Spring Boot API
+│   └── src/main/java/com/blog01/
+│       ├── controller/
+│       ├── service/
+│       ├── repository/
+│       ├── entity/
+│       ├── dto/
+│       ├── security/
+│       ├── storage/
+│       └── config/
+├── frontend/                # Angular SPA
+│   └── src/app/
+│       ├── core/            # guards, interceptors, services
+│       ├── features/        # auth, feed, profile, admin
+│       ├── shared/          # reusable components
+│       └── layout/          # navbar
+├── docker-compose.yml
 └── README.md
 ```
 
-## Security notes
+## Bonus Features Included
 
-- Passwords are hashed with BCrypt
-- JWT is sent via `Authorization: Bearer` header (stored in browser `localStorage` on login)
-- Admin routes are protected with `@PreAuthorize("hasAuthority('ROLE_ADMIN')")`
-- Banned users cannot log in or create posts
+- WebSocket support (STOMP) for real-time feed/comments/notifications
+- Infinite scroll on feed
+- Admin analytics dashboard
+- S3-ready storage abstraction (`StorageService` interface)
 
-## Evaluation checklist
+## Git Workflow
 
-- Authentication and roles
-- Profile blocks, subscriptions, feed
-- Post media upload, likes, comments
-- Reports and admin moderation
-- Responsive custom UI with dark mode toggle
+Recommended branches:
+- `main` — stable releases
+- `develop` — integration
+- `feature/*` — feature branches
+
+## License
+
+MIT — for educational use.

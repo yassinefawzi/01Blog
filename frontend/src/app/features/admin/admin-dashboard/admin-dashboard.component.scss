@@ -1,0 +1,159 @@
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+.stat-card {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1.25rem 1.5rem !important;
+
+  &:hover {
+    transform: translateY(-2px);
+  }
+}
+
+.stat-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  border-radius: 14px;
+  flex-shrink: 0;
+
+  mat-icon {
+    color: white;
+  }
+}
+
+.users .stat-icon { background: linear-gradient(135deg, #6d28d9, #8b5cf6); }
+.posts .stat-icon { background: linear-gradient(135deg, #0891b2, #06b6d4); }
+.reports .stat-icon { background: linear-gradient(135deg, #ea580c, #f97316); }
+.banned .stat-icon { background: linear-gradient(135deg, #dc2626, #f43f5e); }
+
+.stat-data {
+  h3 {
+    margin: 0;
+    font-size: 1.75rem;
+    font-weight: 800;
+    letter-spacing: -0.03em;
+  }
+
+  p {
+    margin: 0.15rem 0 0;
+    font-size: 0.8125rem;
+    color: var(--color-text-muted);
+    font-weight: 500;
+  }
+}
+
+.admin-tabs {
+  mat-icon {
+    margin-right: 6px;
+    font-size: 18px;
+    width: 18px;
+    height: 18px;
+  }
+}
+
+.tab-content {
+  padding: 1rem;
+  overflow-x: auto;
+}
+
+.admin-table {
+  width: 100%;
+  background: transparent;
+
+  th {
+    font-weight: 700;
+    font-size: 0.8125rem;
+    color: var(--color-text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+
+  td {
+    font-size: 0.9375rem;
+  }
+}
+
+.user-cell {
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+  font-weight: 600;
+}
+
+.user-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: var(--color-primary-soft);
+  color: var(--color-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+.role-chip {
+  display: inline-block;
+  padding: 0.2rem 0.625rem;
+  border-radius: var(--radius-full);
+  font-size: 0.75rem;
+  font-weight: 700;
+  background: var(--color-primary-soft);
+  color: var(--color-primary);
+
+  &.admin {
+    background: rgba(234, 88, 12, 0.12);
+    color: #ea580c;
+  }
+}
+
+.status-chip {
+  display: inline-block;
+  padding: 0.2rem 0.625rem;
+  border-radius: var(--radius-full);
+  font-size: 0.75rem;
+  font-weight: 700;
+
+  &.pending { background: rgba(234, 88, 12, 0.12); color: #ea580c; }
+  &.resolved { background: rgba(22, 163, 74, 0.12); color: #16a34a; }
+  &.dismissed { background: rgba(107, 100, 120, 0.12); color: var(--color-text-muted); }
+}
+
+.reason-cell {
+  max-width: 280px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.danger {
+  color: var(--color-accent) !important;
+}
+
+.promote {
+  color: #ea580c !important;
+}
+
+.btn-pill.sm {
+  font-size: 0.8125rem !important;
+  min-height: 32px !important;
+  line-height: 32px !important;
+  padding: 0 12px !important;
+  margin-right: 4px;
+}
+
+@media (max-width: 768px) {
+  .admin-table {
+    font-size: 0.8125rem;
+  }
+}

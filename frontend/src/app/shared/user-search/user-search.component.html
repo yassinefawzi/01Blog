@@ -1,0 +1,43 @@
+<form class="search-form" (submit)="onSubmit($event)">
+  <mat-icon class="search-icon">search</mat-icon>
+  <input
+    type="search"
+    class="search-input"
+    placeholder="Search students..."
+    [(ngModel)]="query"
+    name="q"
+    (input)="onInput()"
+    (focus)="onFocus()"
+    autocomplete="off"
+    aria-label="Search users"
+  />
+  @if (loading()) {
+    <mat-spinner class="search-spinner" diameter="18"></mat-spinner>
+  }
+</form>
+
+@if (open()) {
+  <div class="search-dropdown">
+    @for (user of displayResults(); track user.id) {
+      <a class="search-result" [routerLink]="['/profile', user.username]" (click)="selectUser()">
+        @if (user.avatarUrl) {
+          <img [src]="user.avatarUrl" alt="" class="result-avatar" />
+        } @else {
+          <span class="result-avatar placeholder">{{ user.username[0] | uppercase }}</span>
+        }
+        <div class="result-meta">
+          <strong>{{ user.username }}</strong>
+          <span>{{ user.followersCount }} followers</span>
+        </div>
+        <mat-icon class="result-arrow">chevron_right</mat-icon>
+      </a>
+    } @empty {
+      <div class="search-empty">No users found for "{{ query }}"</div>
+    }
+    @if (displayResults().length > 0) {
+      <button type="button" class="see-all" (click)="onSubmit($event)">
+        See all results
+      </button>
+    }
+  </div>
+}

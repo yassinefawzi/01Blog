@@ -1,0 +1,77 @@
+<header class="navbar">
+  <div class="navbar-inner">
+    <a routerLink="/feed" class="brand">
+      <span class="brand-icon">01</span>
+      <span class="brand-text">Blog</span>
+    </a>
+
+    @if (auth.isLoggedIn) {
+      <app-user-search class="hide-mobile" />
+
+      <nav class="nav-links hide-mobile">
+        <a mat-button routerLink="/feed" routerLinkActive="active" class="nav-pill">
+          <mat-icon>dynamic_feed</mat-icon> Feed
+        </a>
+        <a mat-button routerLink="/create" routerLinkActive="active" class="nav-pill">
+          <mat-icon>edit_note</mat-icon> Create
+        </a>
+        @if (auth.isAdmin) {
+          <a mat-button routerLink="/admin" routerLinkActive="active" class="nav-pill">
+            <mat-icon>admin_panel_settings</mat-icon> Admin
+          </a>
+        }
+      </nav>
+
+      <span class="spacer"></span>
+
+      <div class="nav-actions">
+        <a mat-icon-button routerLink="/create" routerLinkActive="active" class="hide-desktop" aria-label="Create post">
+          <mat-icon>edit_note</mat-icon>
+        </a>
+
+        <button mat-icon-button [matMenuTriggerFor]="notifMenu" aria-label="Notifications">
+          <mat-icon [matBadge]="notifications.unreadCount()" [matBadgeHidden]="notifications.unreadCount() === 0" matBadgeColor="warn">
+            notifications
+          </mat-icon>
+        </button>
+
+        <mat-menu #notifMenu="matMenu" class="notif-menu" xPosition="before">
+          <div class="notif-header">
+            <span>Notifications</span>
+            @if (notifications.unreadCount() > 0) {
+              <button mat-button class="mark-read-btn" (click)="markAllRead(); $event.stopPropagation()">
+                Mark all read
+              </button>
+            }
+          </div>
+          <mat-divider />
+          @for (n of notifications.notifications(); track n.id) {
+            <button mat-menu-item (click)="markRead(n)" class="notif-item">
+              <mat-icon>{{ getNotifIcon(n.type) }}</mat-icon>
+              <span [class.unread]="!n.read">{{ n.message }}</span>
+            </button>
+          } @empty {
+            <div class="notif-empty">You're all caught up</div>
+          }
+        </mat-menu>
+
+        <a mat-button [routerLink]="['/profile', auth.currentUser()?.username]" class="profile-link hide-mobile">
+          <span class="avatar-chip">{{ auth.currentUser()?.username?.[0] | uppercase }}</span>
+          {{ auth.currentUser()?.username }}
+        </a>
+
+        <button mat-icon-button (click)="logout()" aria-label="Logout" class="logout-btn">
+          <mat-icon>logout</mat-icon>
+        </button>
+      </div>
+
+      <app-user-search class="hide-desktop navbar-search-mobile" />
+    } @else {
+      <span class="spacer"></span>
+      <div class="guest-actions">
+        <a mat-button routerLink="/login" class="nav-pill">Sign in</a>
+        <a mat-flat-button color="primary" routerLink="/register" class="btn-pill cta-btn">Get started</a>
+      </div>
+    }
+  </div>
+</header>

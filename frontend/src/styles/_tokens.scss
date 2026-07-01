@@ -1,0 +1,42 @@
+:root {
+  --font-sans: 'Plus Jakarta Sans', system-ui, sans-serif;
+
+  --color-bg: #f4f2ff;
+  --color-bg-elevated: #ffffff;
+  --color-surface: rgba(255, 255, 255, 0.72);
+  --color-border: rgba(99, 72, 180, 0.12);
+  --color-border-strong: rgba(99, 72, 180, 0.22);
+
+  --color-text: #1a1523;
+  --color-text-muted: #6b6478;
+  --color-text-subtle: #948fa3;
+
+  --color-primary: #6d28d9;
+  --color-primary-light: #8b5cf6;
+  --color-primary-soft: rgba(109, 40, 217, 0.1);
+  --color-accent: #f43f5e;
+  --color-accent-soft: rgba(244, 63, 94, 0.12);
+
+  --gradient-brand: linear-gradient(135deg, #6d28d9 0%, #8b5cf6 45%, #ec4899 100%);
+  --gradient-mesh:
+    radial-gradient(ellipse 80% 60% at 10% -10%, rgba(139, 92, 246, 0.28), transparent 55%),
+    radial-gradient(ellipse 70% 50% at 95% 5%, rgba(236, 72, 153, 0.18), transparent 50%),
+    radial-gradient(ellipse 60% 40% at 50% 100%, rgba(109, 40, 217, 0.12), transparent 55%),
+    var(--color-bg);
+
+  --shadow-sm: 0 1px 2px rgba(26, 21, 35, 0.06);
+  --shadow-md: 0 8px 24px rgba(76, 29, 149, 0.1);
+  --shadow-lg: 0 20px 48px rgba(76, 29, 149, 0.14);
+  --shadow-card: 0 4px 6px rgba(26, 21, 35, 0.04), 0 12px 32px rgba(109, 40, 217, 0.08);
+
+  --radius-sm: 10px;
+  --radius-md: 16px;
+  --radius-lg: 24px;
+  --radius-full: 9999px;
+
+  --nav-height: 68px;
+  --page-max-width: 720px;
+  --admin-max-width: 1180px;
+
+  --transition: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
