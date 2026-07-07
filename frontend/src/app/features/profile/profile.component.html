@@ -24,8 +24,6 @@
               <h1>{{ u.username }}</h1>
               @if (u.bio) {
                 <p class="bio">{{ u.bio }}</p>
-              } @else if (u.ownProfile) {
-                <p class="bio placeholder-bio">Add a bio to tell others about yourself</p>
               }
               <div class="stats">
                 <button type="button" class="stat stat-btn" [class.active]="isStatActive('followers')"

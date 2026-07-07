@@ -1,6 +1,6 @@
 # 01Blog — Social Learning Platform
 
-A fullstack social blogging platform where students share posts, follow each other, interact through likes and comments, receive notifications, and report inappropriate content. Admins manage users, posts, and reports through a secure dashboard.
+A fullstack social blogging platform where 01talents share posts, follow each other, interact through likes and comments, receive notifications, and report inappropriate content. Admins manage users, posts, and reports through a secure dashboard.
 
 ## Architecture Overview
 
