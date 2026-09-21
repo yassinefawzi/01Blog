@@ -5,7 +5,7 @@ A fullstack social blogging platform where 01talents share posts, follow each ot
 ## Architecture Overview
 
 ```
-┌─────────────────┐     REST + WebSocket      ┌──────────────────────────────┐
+┌─────────────────┐     REST + JWT            ┌──────────────────────────────┐
 │  Angular 19     │ ◄──────────────────────► │  Spring Boot 3 REST API       │
 │  (Material UI)  │     JWT Bearer Auth       │  Spring Security + JWT        │
 └─────────────────┘                           └──────────────┬───────────────┘
@@ -35,8 +35,8 @@ A fullstack social blogging platform where 01talents share posts, follow each ot
 
 | Layer    | Stack |
 |----------|-------|
-| Backend  | Java 21, Spring Boot 3.3, Spring Security, JWT (jjwt), JPA, PostgreSQL, WebSocket (STOMP) |
-| Frontend | Angular 19, Angular Material, RxJS, SockJS/STOMP |
+| Backend  | Java 21, Spring Boot 3.3, Spring Security, JWT (jjwt), JPA, PostgreSQL |
+| Frontend | Angular 19, Angular Material, RxJS |
 | DevOps   | Docker Compose (PostgreSQL), Maven, npm |
 
 ## Prerequisites
@@ -100,7 +100,6 @@ App URL: `http://localhost:4200`
 | Key | Default | Description |
 |-----|---------|-------------|
 | `apiUrl` | `http://localhost:8080/api` | Backend REST base URL |
-| `wsUrl` | `http://localhost:8080/api/ws` | WebSocket endpoint |
 
 ## API Endpoints
 
@@ -173,7 +172,6 @@ blog01/
 
 ## Bonus Features Included
 
-- WebSocket support (STOMP) for real-time feed/comments/notifications
 - Infinite scroll on feed
 - Admin analytics dashboard
 - S3-ready storage abstraction (`StorageService` interface)

@@ -1,6 +1,5 @@
 package com.blog01.service;
 
-import com.blog01.dto.request.UpdateProfileRequest;
 import com.blog01.dto.response.UserResponse;
 import com.blog01.entity.User;
 import com.blog01.exception.ResourceNotFoundException;
@@ -40,15 +39,6 @@ public class UserService {
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found"));
         return mapper.toUserResponse(user, currentUser);
-    }
-
-    @Transactional
-    public UserResponse updateProfile(User currentUser, UpdateProfileRequest request) {
-        if (request.getBio() != null) {
-            currentUser.setBio(request.getBio());
-        }
-        User saved = userRepository.save(currentUser);
-        return mapper.toUserResponse(saved, saved);
     }
 
     @Transactional

@@ -10,7 +10,6 @@ import com.blog01.mapper.EntityMapper;
 import com.blog01.repository.CommentRepository;
 import com.blog01.repository.PostRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -24,7 +23,6 @@ public class CommentService {
     private final PostRepository postRepository;
     private final NotificationService notificationService;
     private final EntityMapper mapper;
-    private final SimpMessagingTemplate messagingTemplate;
 
     public List<CommentResponse> getComments(Long postId) {
         Post post = postRepository.findById(postId)
@@ -48,9 +46,7 @@ public class CommentService {
 
         notificationService.notifyPostAuthorOfComment(post, currentUser);
 
-        CommentResponse response = mapper.toCommentResponse(comment);
-        messagingTemplate.convertAndSend("/topic/posts/" + postId + "/comments", response);
-        return response;
+        return mapper.toCommentResponse(comment);
     }
 
     @Transactional

@@ -23,7 +23,6 @@ public class DataInitializer implements CommandLineRunner {
                     .email("admin@01blog.com")
                     .password(passwordEncoder.encode("admin123"))
                     .role(Role.ADMIN)
-                    .bio("Platform administrator")
                     .build());
         }
     }

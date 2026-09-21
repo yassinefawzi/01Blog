@@ -29,9 +29,6 @@
           }
           <div class="user-info">
             <strong>{{ user.username }}</strong>
-            @if (user.bio) {
-              <p class="bio">{{ user.bio }}</p>
-            }
             <span class="stats">{{ user.followersCount }} followers · {{ user.followingCount }} following</span>
           </div>
           <button mat-stroked-button class="btn-pill view-btn">View profile</button>

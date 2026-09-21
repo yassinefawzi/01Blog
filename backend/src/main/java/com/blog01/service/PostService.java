@@ -12,7 +12,6 @@ import com.blog01.repository.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -32,17 +31,16 @@ public class PostService {
     private final SubscriptionRepository subscriptionRepository;
     private final NotificationService notificationService;
     private final EntityMapper mapper;
-    private final SimpMessagingTemplate messagingTemplate;
 
     public PageResponse<PostResponse> getFeed(User currentUser, int page, int size) {
-        List<Long> followingIds = subscriptionRepository.findFollowingIds(currentUser.getId());
+        List<Long> followingIds = subscriptionRepository.findFollowingIdByFollowerId(currentUser.getId());
         followingIds.add(currentUser.getId());
 
         if (followingIds.isEmpty()) {
             return emptyPage(page, size);
         }
 
-        Page<Post> posts = postRepository.findFeedPosts(followingIds, PageRequest.of(page, size));
+        Page<Post> posts = postRepository.findByAuthorIdInOrderByCreatedAtDesc(followingIds, PageRequest.of(page, size));
         return toPageResponse(posts, currentUser, false);
     }
 
@@ -70,9 +68,7 @@ public class PostService {
 
         notificationService.notifyFollowersOfNewPost(currentUser, post);
 
-        PostResponse response = toPostResponse(post, currentUser, true);
-        messagingTemplate.convertAndSend("/topic/feed", response);
-        return response;
+        return toPostResponse(post, currentUser, true);
     }
 
     @Transactional

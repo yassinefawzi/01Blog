@@ -22,9 +22,6 @@
             </div>
             <div class="profile-details">
               <h1>{{ u.username }}</h1>
-              @if (u.bio) {
-                <p class="bio">{{ u.bio }}</p>
-              }
               <div class="stats">
                 <button type="button" class="stat stat-btn" [class.active]="isStatActive('followers')"
                         (click)="showConnections('followers')">

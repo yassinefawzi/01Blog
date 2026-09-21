@@ -29,10 +29,6 @@ export class UserService {
     return this.http.get<User>(`${environment.apiUrl}/users/${username}`);
   }
 
-  updateProfile(bio: string) {
-    return this.http.put<User>(`${environment.apiUrl}/users/me`, { bio });
-  }
-
   uploadAvatar(file: File) {
     const form = new FormData();
     form.append('file', file);

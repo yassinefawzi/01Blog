@@ -27,14 +27,14 @@ public class SubscriptionService {
 
     public List<UserSummary> getFollowers(String username) {
         User user = findUser(username);
-        return subscriptionRepository.findFollowers(user.getId()).stream()
+        return subscriptionRepository.findFollowerByFollowingIdOrderByCreatedAtDesc(user.getId()).stream()
                 .map(mapper::toUserSummary)
                 .toList();
     }
 
     public List<UserSummary> getFollowing(String username) {
         User user = findUser(username);
-        return subscriptionRepository.findFollowing(user.getId()).stream()
+        return subscriptionRepository.findFollowingByFollowerIdOrderByCreatedAtDesc(user.getId()).stream()
                 .map(mapper::toUserSummary)
                 .toList();
     }

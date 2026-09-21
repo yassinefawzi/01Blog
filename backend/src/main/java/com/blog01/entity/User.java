@@ -32,9 +32,6 @@ public class User implements UserDetails {
     @Column(nullable = false)
     private String password;
 
-    @Column(length = 500)
-    private String bio;
-
     private String avatarUrl;
 
     @Enumerated(EnumType.STRING)

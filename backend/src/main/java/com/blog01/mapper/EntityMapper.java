@@ -32,7 +32,6 @@ public class EntityMapper {
                 .id(user.getId())
                 .username(user.getUsername())
                 .email(currentUser != null && currentUser.getId().equals(user.getId()) ? user.getEmail() : null)
-                .bio(user.getBio())
                 .avatarUrl(user.getAvatarUrl())
                 .role(user.getRole())
                 .createdAt(user.getCreatedAt())

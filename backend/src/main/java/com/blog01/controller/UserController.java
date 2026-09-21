@@ -1,10 +1,8 @@
 package com.blog01.controller;
 
-import com.blog01.dto.request.UpdateProfileRequest;
 import com.blog01.dto.response.UserResponse;
 import com.blog01.security.SecurityUtils;
 import com.blog01.service.UserService;
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -30,11 +28,6 @@ public class UserController {
     @GetMapping("/{username}")
     public UserResponse getProfile(@PathVariable String username) {
         return userService.getProfile(username, securityUtils.getCurrentUser());
-    }
-
-    @PutMapping("/me")
-    public UserResponse updateProfile(@Valid @RequestBody UpdateProfileRequest request) {
-        return userService.updateProfile(securityUtils.getCurrentUser(), request);
     }
 
     @PostMapping("/me/avatar")

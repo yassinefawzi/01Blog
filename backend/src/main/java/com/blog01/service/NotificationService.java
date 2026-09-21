@@ -10,7 +10,6 @@ import com.blog01.repository.SubscriptionRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -24,7 +23,6 @@ public class NotificationService {
     private final NotificationRepository notificationRepository;
     private final SubscriptionRepository subscriptionRepository;
     private final EntityMapper mapper;
-    private final SimpMessagingTemplate messagingTemplate;
 
     public PageResponse<NotificationResponse> getNotifications(User user, int page, int size) {
         Page<Notification> notifications = notificationRepository
@@ -59,11 +57,13 @@ public class NotificationService {
 
     @Transactional
     public void markAllAsRead(User user) {
-        notificationRepository.markAllAsRead(user.getId());
+        List<Notification> unread = notificationRepository.findByRecipientIdAndReadFalse(user.getId());
+        unread.forEach(notification -> notification.setRead(true));
+        notificationRepository.saveAll(unread);
     }
 
     public void notifyFollowersOfNewPost(User author, Post post) {
-        subscriptionRepository.findFollowers(author.getId()).forEach(follower ->
+        subscriptionRepository.findFollowerByFollowingIdOrderByCreatedAtDesc(author.getId()).forEach(follower ->
                 createNotification(
                         follower,
                         author.getUsername() + " published a new post",
@@ -106,8 +106,6 @@ public class NotificationService {
                 .relatedPostId(postId)
                 .relatedUserId(userId)
                 .build();
-        notification = notificationRepository.save(notification);
-        NotificationResponse response = mapper.toNotificationResponse(notification);
-        messagingTemplate.convertAndSend("/topic/users/" + recipient.getId() + "/notifications", response);
+        notificationRepository.save(notification);
     }
 }

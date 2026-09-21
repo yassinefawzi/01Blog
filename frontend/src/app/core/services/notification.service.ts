@@ -4,31 +4,27 @@ import { tap } from 'rxjs/operators';
 import { environment } from '../../../environments/environment';
 import { Notification, PageResponse } from '../models';
 import { AuthService } from './auth.service';
-import { WebSocketService } from './websocket.service';
 
 @Injectable({ providedIn: 'root' })
 export class NotificationService {
   private http = inject(HttpClient);
   private auth = inject(AuthService);
-  private ws = inject(WebSocketService);
 
   readonly notifications = signal<Notification[]>([]);
   readonly unreadCount = signal(0);
 
-  private connectedUserId: number | null = null;
+  private loadedUserId: number | null = null;
 
   constructor() {
     effect(() => {
       const user = this.auth.currentUser();
       if (user) {
-        if (this.connectedUserId !== user.id) {
-          this.connectedUserId = user.id;
-          this.connect(user.id);
+        if (this.loadedUserId !== user.id) {
+          this.loadedUserId = user.id;
           this.refresh();
         }
       } else {
-        this.connectedUserId = null;
-        this.ws.disconnect();
+        this.loadedUserId = null;
         this.notifications.set([]);
         this.unreadCount.set(0);
       }
@@ -62,25 +58,6 @@ export class NotificationService {
         this.unreadCount.set(0);
       })
     );
-  }
-
-  private connect(userId: number): void {
-    this.ws.connect<Notification>(
-      `/topic/users/${userId}/notifications`,
-      notification => this.pushNotification(notification)
-    );
-  }
-
-  private pushNotification(notification: Notification): void {
-    this.notifications.update(list => {
-      if (list.some(n => n.id === notification.id)) {
-        return list;
-      }
-      return [notification, ...list].slice(0, 20);
-    });
-    if (!notification.read) {
-      this.unreadCount.update(count => count + 1);
-    }
   }
 
   private applyRead(notification: Notification): void {
