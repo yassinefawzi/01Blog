@@ -2,6 +2,7 @@ package com.blog01.controller;
 
 import com.blog01.dto.response.AdminStatsResponse;
 import com.blog01.dto.response.PageResponse;
+import com.blog01.dto.response.PostResponse;
 import com.blog01.dto.response.ReportResponse;
 import com.blog01.dto.response.UserResponse;
 import com.blog01.entity.ReportStatus;
@@ -35,6 +36,14 @@ public class AdminController {
         return adminService.getAllUsers(page, size);
     }
 
+    @GetMapping("/posts")
+    public PageResponse<PostResponse> getPosts(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size
+    ) {
+        return adminService.getAllPosts(securityUtils.getCurrentUser(), page, size);
+    }
+
     @PatchMapping("/users/{id}/ban")
     public UserResponse banUser(@PathVariable Long id, @RequestParam boolean banned) {
         return adminService.banUser(id, banned);
@@ -48,6 +57,11 @@ public class AdminController {
     @DeleteMapping("/users/{id}")
     public void deleteUser(@PathVariable Long id) {
         adminService.deleteUser(id);
+    }
+
+    @PatchMapping("/posts/{id}/hide")
+    public PostResponse hidePost(@PathVariable Long id, @RequestParam boolean hidden) {
+        return postService.setHidden(id, hidden);
     }
 
     @DeleteMapping("/posts/{id}")

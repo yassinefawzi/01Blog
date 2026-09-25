@@ -40,20 +40,35 @@ public class PostService {
             return emptyPage(page, size);
         }
 
-        Page<Post> posts = postRepository.findByAuthorIdInOrderByCreatedAtDesc(followingIds, PageRequest.of(page, size));
-        return toPageResponse(posts, currentUser, false);
+        Page<Post> posts = postRepository.findByAuthorIdInAndHiddenFalseOrderByCreatedAtDesc(
+                followingIds, PageRequest.of(page, size));
+        return toPageResponse(posts, currentUser, true);
     }
 
     public PageResponse<PostResponse> getUserPosts(String username, User currentUser, int page, int size) {
         User author = userRepository.findByUsername(username)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found"));
-        Page<Post> posts = postRepository.findByAuthorOrderByCreatedAtDesc(author, PageRequest.of(page, size));
+        boolean canSeeHidden = currentUser.getRole() == Role.ADMIN
+                || currentUser.getId().equals(author.getId());
+        Page<Post> posts = canSeeHidden
+                ? postRepository.findByAuthorOrderByCreatedAtDesc(author, PageRequest.of(page, size))
+                : postRepository.findByAuthorAndHiddenFalseOrderByCreatedAtDesc(author, PageRequest.of(page, size));
         return toPageResponse(posts, currentUser, true);
     }
 
     public PostResponse getPost(Long id, User currentUser) {
         Post post = findPost(id);
+        if (post.isHidden()
+                && currentUser.getRole() != Role.ADMIN
+                && !post.getAuthor().getId().equals(currentUser.getId())) {
+            throw new ResourceNotFoundException("Post not found");
+        }
         return toPostResponse(post, currentUser, true);
+    }
+
+    public PageResponse<PostResponse> getAllPosts(User currentUser, int page, int size) {
+        Page<Post> posts = postRepository.findAllByOrderByCreatedAtDesc(PageRequest.of(page, size));
+        return toPageResponse(posts, currentUser, false);
     }
 
     @Transactional
@@ -76,10 +91,18 @@ public class PostService {
         Post post = findPost(id);
         assertOwner(post, currentUser);
         post.setDescription(request.getDescription());
-        if (request.getMediaUrl() != null) post.setMediaUrl(request.getMediaUrl());
-        if (request.getMediaType() != null) post.setMediaType(request.getMediaType());
+        post.setMediaUrl(request.getMediaUrl());
+        post.setMediaType(request.getMediaType() != null ? request.getMediaType() : MediaType.NONE);
         post = postRepository.save(post);
         return toPostResponse(post, currentUser, true);
+    }
+
+    @Transactional
+    public PostResponse setHidden(Long id, boolean hidden) {
+        Post post = findPost(id);
+        post.setHidden(hidden);
+        post = postRepository.save(post);
+        return toPostResponse(post, post.getAuthor(), false);
     }
 
     @Transactional

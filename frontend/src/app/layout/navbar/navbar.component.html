@@ -25,8 +25,30 @@
       <span class="spacer"></span>
 
       <div class="nav-actions">
+        <button mat-icon-button type="button" (click)="theme.toggle()"
+                [attr.aria-label]="theme.dark() ? 'Switch to light mode' : 'Switch to dark mode'">
+          <mat-icon>{{ theme.dark() ? 'light_mode' : 'dark_mode' }}</mat-icon>
+        </button>
+
         <a mat-icon-button routerLink="/create" routerLinkActive="active" class="hide-desktop" aria-label="Create post">
           <mat-icon>edit_note</mat-icon>
+        </a>
+
+        @if (auth.isAdmin) {
+          <a mat-icon-button routerLink="/admin" routerLinkActive="active" class="hide-desktop" aria-label="Admin dashboard">
+            <mat-icon>admin_panel_settings</mat-icon>
+          </a>
+        }
+
+        <a mat-icon-button
+           [routerLink]="['/profile', auth.currentUser()?.username]"
+           class="hide-desktop"
+           aria-label="My profile">
+          @if (auth.currentUser()?.avatarUrl; as avatarUrl) {
+            <img [src]="avatarUrl" alt="" class="avatar-chip mobile-avatar" />
+          } @else {
+            <mat-icon>person</mat-icon>
+          }
         </a>
 
         <button mat-icon-button [matMenuTriggerFor]="notifMenu" aria-label="Notifications">
@@ -56,7 +78,11 @@
         </mat-menu>
 
         <a mat-button [routerLink]="['/profile', auth.currentUser()?.username]" class="profile-link hide-mobile">
-          <span class="avatar-chip">{{ auth.currentUser()?.username?.[0] | uppercase }}</span>
+          @if (auth.currentUser()?.avatarUrl; as avatarUrl) {
+            <img [src]="avatarUrl" alt="" class="avatar-chip" />
+          } @else {
+            <span class="avatar-chip placeholder">{{ auth.currentUser()?.username?.[0] | uppercase }}</span>
+          }
           {{ auth.currentUser()?.username }}
         </a>
 
@@ -69,6 +95,10 @@
     } @else {
       <span class="spacer"></span>
       <div class="guest-actions">
+        <button mat-icon-button type="button" (click)="theme.toggle()"
+                [attr.aria-label]="theme.dark() ? 'Switch to light mode' : 'Switch to dark mode'">
+          <mat-icon>{{ theme.dark() ? 'light_mode' : 'dark_mode' }}</mat-icon>
+        </button>
         <a mat-button routerLink="/login" class="nav-pill">Sign in</a>
         <a mat-flat-button color="primary" routerLink="/register" class="btn-pill cta-btn">Get started</a>
       </div>

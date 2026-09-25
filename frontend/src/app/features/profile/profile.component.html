@@ -67,6 +67,11 @@
         <header class="section-header">
           <h2>Posts</h2>
           <span class="count">{{ u.postCount }}</span>
+          @if (u.ownProfile) {
+            <a mat-flat-button color="primary" routerLink="/create" class="btn-pill create-link">
+              <mat-icon>add</mat-icon> New post
+            </a>
+          }
         </header>
 
         @for (post of posts(); track post.id) {

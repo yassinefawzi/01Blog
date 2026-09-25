@@ -1,4 +1,4 @@
-import { Injectable, effect, inject, signal } from '@angular/core';
+import { Injectable, OnDestroy, effect, inject, signal } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { tap } from 'rxjs/operators';
 import { environment } from '../../../environments/environment';
@@ -6,7 +6,7 @@ import { Notification, PageResponse } from '../models';
 import { AuthService } from './auth.service';
 
 @Injectable({ providedIn: 'root' })
-export class NotificationService {
+export class NotificationService implements OnDestroy {
   private http = inject(HttpClient);
   private auth = inject(AuthService);
 
@@ -14,6 +14,8 @@ export class NotificationService {
   readonly unreadCount = signal(0);
 
   private loadedUserId: number | null = null;
+  private pollTimer: ReturnType<typeof setInterval> | null = null;
+  private readonly POLL_MS = 30_000;
 
   constructor() {
     effect(() => {
@@ -23,12 +25,18 @@ export class NotificationService {
           this.loadedUserId = user.id;
           this.refresh();
         }
+        this.startPolling();
       } else {
         this.loadedUserId = null;
         this.notifications.set([]);
         this.unreadCount.set(0);
+        this.stopPolling();
       }
     });
+  }
+
+  ngOnDestroy(): void {
+    this.stopPolling();
   }
 
   refresh(): void {
@@ -65,5 +73,21 @@ export class NotificationService {
       list.map(n => (n.id === notification.id ? { ...n, read: true } : n))
     );
     this.unreadCount.update(count => Math.max(0, count - 1));
+  }
+
+  private startPolling(): void {
+    if (this.pollTimer) return;
+    this.pollTimer = setInterval(() => {
+      if (this.auth.currentUser()) {
+        this.refresh();
+      }
+    }, this.POLL_MS);
+  }
+
+  private stopPolling(): void {
+    if (this.pollTimer) {
+      clearInterval(this.pollTimer);
+      this.pollTimer = null;
+    }
   }
 }

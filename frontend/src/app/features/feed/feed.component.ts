@@ -1,4 +1,4 @@
-import { Component, OnInit, signal } from '@angular/core';
+import { Component, ElementRef, OnDestroy, OnInit, signal, ViewChild } from '@angular/core';
 import { PostService } from '../../core/services/post.service';
 import { Post } from '../../core/models';
 import { PostCardComponent } from '../../shared/post-card/post-card.component';
@@ -14,14 +14,30 @@ import { RouterLink } from '@angular/router';
   templateUrl: './feed.component.html',
   styleUrl: './feed.component.scss'
 })
-export class FeedComponent implements OnInit {
+export class FeedComponent implements OnInit, OnDestroy {
   posts = signal<Post[]>([]);
   loading = signal(true);
   loadingMore = signal(false);
   page = 0;
   last = false;
 
+  private sentinelEl?: ElementRef<HTMLElement>;
+  private observer = new IntersectionObserver(entries => {
+    if (entries.some(entry => entry.isIntersecting)) this.loadMore();
+  }, { rootMargin: '320px' });
+
+  @ViewChild('sentinel')
+  set sentinel(el: ElementRef<HTMLElement> | undefined) {
+    if (this.sentinelEl) this.observer.unobserve(this.sentinelEl.nativeElement);
+    this.sentinelEl = el;
+    if (el) this.observer.observe(el.nativeElement);
+  }
+
   constructor(private postService: PostService) {}
+
+  ngOnDestroy(): void {
+    this.observer.disconnect();
+  }
 
   ngOnInit(): void {
     this.loadFeed();

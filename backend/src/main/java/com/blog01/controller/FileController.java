@@ -32,16 +32,40 @@ public class FileController {
     @GetMapping("/{filename:.+}")
     public ResponseEntity<Resource> serveFile(@PathVariable String filename) {
         try {
-            Path file = Paths.get(uploadDir).resolve(filename).normalize();
+            // Reject path traversal attempts (e.g. ../)
+            if (filename.contains("..") || filename.contains("/") || filename.contains("\\")) {
+                return ResponseEntity.badRequest().build();
+            }
+
+            Path uploadRoot = Paths.get(uploadDir).toAbsolutePath().normalize();
+            Path file = uploadRoot.resolve(filename).normalize();
+
+            if (!file.startsWith(uploadRoot)) {
+                return ResponseEntity.badRequest().build();
+            }
+
             Resource resource = new UrlResource(file.toUri());
-            if (!resource.exists()) {
+            if (!resource.exists() || !resource.isReadable()) {
                 return ResponseEntity.notFound().build();
             }
+
+            MediaType mediaType = probeMediaType(filename);
             return ResponseEntity.ok()
-                    .contentType(MediaType.APPLICATION_OCTET_STREAM)
+                    .contentType(mediaType)
                     .body(resource);
         } catch (Exception e) {
             return ResponseEntity.notFound().build();
         }
+    }
+
+    private MediaType probeMediaType(String filename) {
+        String lower = filename.toLowerCase();
+        if (lower.endsWith(".png")) return MediaType.IMAGE_PNG;
+        if (lower.endsWith(".jpg") || lower.endsWith(".jpeg")) return MediaType.IMAGE_JPEG;
+        if (lower.endsWith(".gif")) return MediaType.IMAGE_GIF;
+        if (lower.endsWith(".webp")) return MediaType.parseMediaType("image/webp");
+        if (lower.endsWith(".mp4")) return MediaType.parseMediaType("video/mp4");
+        if (lower.endsWith(".webm")) return MediaType.parseMediaType("video/webm");
+        return MediaType.APPLICATION_OCTET_STREAM;
     }
 }

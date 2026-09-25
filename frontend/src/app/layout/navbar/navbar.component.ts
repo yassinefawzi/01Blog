@@ -10,6 +10,7 @@ import { AuthService } from '../../core/services/auth.service';
 import { NotificationService } from '../../core/services/notification.service';
 import { Notification, NotificationType } from '../../core/models';
 import { UserSearchComponent } from '../../shared/user-search/user-search.component';
+import { ThemeService } from '../../core/services/theme.service';
 
 @Component({
   selector: 'app-navbar',
@@ -25,6 +26,7 @@ import { UserSearchComponent } from '../../shared/user-search/user-search.compon
 export class NavbarComponent {
   auth = inject(AuthService);
   notifications = inject(NotificationService);
+  theme = inject(ThemeService);
 
   markRead(n: Notification): void {
     if (!n.read) {

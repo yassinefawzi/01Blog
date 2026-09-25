@@ -24,14 +24,10 @@
       }
 
       @if (!last && posts().length > 0) {
-        <div class="load-more">
-          <button mat-stroked-button class="btn-pill" (click)="loadMore()" [disabled]="loadingMore()">
-            @if (loadingMore()) {
-              <mat-spinner diameter="20"></mat-spinner>
-            } @else {
-              Load more posts
-            }
-          </button>
+        <div #sentinel class="load-more">
+          @if (loadingMore()) {
+            <mat-spinner diameter="28"></mat-spinner>
+          }
         </div>
       }
     }

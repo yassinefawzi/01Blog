@@ -33,6 +33,18 @@ export class AdminService {
     return this.http.delete<void>(`${environment.apiUrl}/admin/posts/${id}`);
   }
 
+  hidePost(id: number, hidden: boolean) {
+    const params = new HttpParams().set('hidden', hidden);
+    return this.http.patch<import('../models').Post>(
+      `${environment.apiUrl}/admin/posts/${id}/hide`, {}, { params }
+    );
+  }
+
+  getPosts(page = 0, size = 20) {
+    const params = new HttpParams().set('page', page).set('size', size);
+    return this.http.get<PageResponse<import('../models').Post>>(`${environment.apiUrl}/admin/posts`, { params });
+  }
+
   getReports(page = 0, size = 20, status?: ReportStatus) {
     let params = new HttpParams().set('page', page).set('size', size);
     if (status) params = params.set('status', status);

@@ -15,11 +15,12 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
     catchError((error: HttpErrorResponse) => {
       const isAuthError = error.status === 401 || error.status === 403;
       const tokenExpired = error.headers.get('X-Token-Expired') === 'true';
+      const accountBanned = error.headers.get('X-Account-Banned') === 'true';
       const hasToken = !!auth.token;
       const isAuthEndpoint = req.url.includes('/auth/');
 
       if (hasToken && isAuthError && !isAuthEndpoint) {
-        auth.logout(tokenExpired ? { expired: '1' } : undefined);
+        auth.logout(accountBanned ? { banned: '1' } : tokenExpired ? { expired: '1' } : undefined);
       }
 
       return throwError(() => error);

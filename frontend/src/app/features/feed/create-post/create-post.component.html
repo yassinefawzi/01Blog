@@ -8,10 +8,19 @@
     <mat-card class="create-card surface-card">
       <mat-card-content>
         <form [formGroup]="form" (ngSubmit)="submit()">
-          <mat-form-field appearance="outline" class="full-width content-field">
-            <mat-label>What's on your mind?</mat-label>
-            <textarea matInput rows="7" formControlName="description" placeholder="Write something inspiring..."></textarea>
-          </mat-form-field>
+          <div class="editor-toolbar">
+            <button mat-button type="button" class="btn-pill" [class.active]="!preview" (click)="preview = false">Write</button>
+            <button mat-button type="button" class="btn-pill" [class.active]="preview" (click)="preview = true">Preview</button>
+            <span class="md-hint">Markdown supported</span>
+          </div>
+          @if (!preview) {
+            <mat-form-field appearance="outline" class="full-width content-field">
+              <mat-label>What's on your mind?</mat-label>
+              <textarea matInput rows="7" formControlName="description" placeholder="**Bold**, lists, and `code` are supported"></textarea>
+            </mat-form-field>
+          } @else {
+            <div class="markdown-body markdown-preview" [innerHTML]="form.controls.description.value | markdown"></div>
+          }
 
           <div class="upload-zone" (click)="fileInput.click()" [class.has-file]="previewUrl">
             <input type="file" #fileInput hidden accept="image/*,video/*" (change)="onFileSelected($event)" />

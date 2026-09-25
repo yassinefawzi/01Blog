@@ -87,6 +87,8 @@ export class ProfileComponent implements OnInit {
   toggleSubscribe(): void {
     const u = this.user();
     if (!u) return;
+    const action = u.subscribed ? 'Unsubscribe from' : 'Subscribe to';
+    if (!confirm(`${action} ${u.username}?`)) return;
     this.userService.toggleSubscription(u.username).subscribe(res => {
       this.user.set({ ...u, subscribed: res.subscribed });
     });

@@ -1,7 +1,8 @@
 import { Injectable, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
-import { tap } from 'rxjs/operators';
+import { Observable, of } from 'rxjs';
+import { catchError, tap } from 'rxjs/operators';
 import { environment } from '../../../environments/environment';
 import { AuthResponse, User } from '../models';
 
@@ -48,6 +49,24 @@ export class AuthService {
   updateCurrentUser(user: User): void {
     localStorage.setItem(this.userKey, JSON.stringify(user));
     this.currentUser.set(user);
+  }
+
+  refreshSession(): Observable<User | null> {
+    const user = this.currentUser();
+    if (!this.token || !user?.username) return of(null);
+    return this.http.get<User>(`${environment.apiUrl}/users/${encodeURIComponent(user.username)}`).pipe(
+      tap(fresh => {
+        const current = this.currentUser();
+        if (!current || current.id !== fresh.id) return;
+        if (fresh.banned) {
+          this.logout({ banned: '1' });
+          return;
+        }
+        if (current.role === fresh.role && current.banned === fresh.banned) return;
+        this.updateCurrentUser({ ...current, ...fresh });
+      }),
+      catchError(() => of(null))
+    );
   }
 
   private setSession(res: AuthResponse): void {

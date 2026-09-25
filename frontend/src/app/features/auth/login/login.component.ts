@@ -33,7 +33,9 @@ export class LoginComponent implements OnInit {
   loading = false;
 
   ngOnInit(): void {
-    if (this.route.snapshot.queryParamMap.get('expired') === '1') {
+    if (this.route.snapshot.queryParamMap.get('banned') === '1') {
+      this.snackBar.open('Your account has been banned.', 'OK', { duration: 5000 });
+    } else if (this.route.snapshot.queryParamMap.get('expired') === '1') {
       this.snackBar.open('Your session expired. Please sign in again.', 'OK', { duration: 5000 });
     }
   }

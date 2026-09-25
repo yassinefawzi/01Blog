@@ -40,3 +40,32 @@
 
   --transition: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
+
+html[data-theme='dark'] {
+  --color-bg: #100e17;
+  --color-bg-elevated: #1b1726;
+  --color-surface: rgba(27, 23, 38, 0.86);
+  --color-border: rgba(196, 181, 253, 0.16);
+  --color-border-strong: rgba(196, 181, 253, 0.28);
+
+  --color-text: #f4f1fb;
+  --color-text-muted: #c4bdd4;
+  --color-text-subtle: #9b93ad;
+
+  --color-primary: #c4b5fd;
+  --color-primary-light: #ddd6fe;
+  --color-primary-soft: rgba(196, 181, 253, 0.16);
+  --color-accent: #fb7185;
+  --color-accent-soft: rgba(251, 113, 133, 0.16);
+
+  --gradient-mesh:
+    radial-gradient(ellipse 80% 60% at 10% -10%, rgba(109, 40, 217, 0.35), transparent 55%),
+    radial-gradient(ellipse 70% 50% at 95% 5%, rgba(236, 72, 153, 0.16), transparent 50%),
+    radial-gradient(ellipse 60% 40% at 50% 100%, rgba(76, 29, 149, 0.22), transparent 55%),
+    var(--color-bg);
+
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.35);
+  --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.35);
+  --shadow-lg: 0 20px 48px rgba(0, 0, 0, 0.45);
+  --shadow-card: 0 4px 6px rgba(0, 0, 0, 0.25), 0 12px 32px rgba(0, 0, 0, 0.28);
+}

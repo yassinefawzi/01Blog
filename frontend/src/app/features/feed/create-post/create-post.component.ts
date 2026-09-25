@@ -10,13 +10,15 @@ import { PostService } from '../../../core/services/post.service';
 import { FileService } from '../../../core/services/file.service';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MarkdownPipe } from '../../../shared/markdown.pipe';
 
 @Component({
   selector: 'app-create-post',
   standalone: true,
   imports: [
     ReactiveFormsModule, MatCardModule, MatFormFieldModule, MatInputModule,
-    MatButtonModule, MatIconModule, MatSnackBarModule, MatProgressSpinnerModule, RouterLink
+    MatButtonModule, MatIconModule, MatSnackBarModule, MatProgressSpinnerModule, RouterLink,
+    MarkdownPipe
   ],
   templateUrl: './create-post.component.html',
   styleUrl: './create-post.component.scss'
@@ -36,6 +38,7 @@ export class CreatePostComponent {
   previewUrl?: string;
   uploading = false;
   submitting = false;
+  preview = false;
 
   onFileSelected(event: Event): void {
     const input = event.target as HTMLInputElement;
@@ -59,6 +62,7 @@ export class CreatePostComponent {
 
   submit(): void {
     if (this.form.invalid) return;
+    if (!confirm('Publish this post?')) return;
     this.submitting = true;
     this.postService.createPost({
       description: this.form.value.description!,

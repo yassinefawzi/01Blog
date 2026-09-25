@@ -65,6 +65,10 @@ export class ReportDialogComponent {
   ) {}
 
   submit(): void {
+    if (!this.reason.trim()) return;
+    if (!confirm('Submit this report? Our moderators will review it.')) {
+      return;
+    }
     this.reportService.createReport({
       reason: this.reason.trim(),
       reportedPostId: this.data.reportedPostId,

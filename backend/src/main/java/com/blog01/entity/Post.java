@@ -32,6 +32,10 @@ public class Post {
     @Builder.Default
     private MediaType mediaType = MediaType.NONE;
 
+    @Column(nullable = false)
+    @Builder.Default
+    private boolean hidden = false;
+
     @Column(nullable = false, updatable = false)
     @Builder.Default
     private Instant createdAt = Instant.now();

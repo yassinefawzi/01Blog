@@ -129,6 +129,7 @@ App URL: `http://localhost:4200`
 |--------|------|-------------|
 | GET | `/admin/stats` | Dashboard analytics |
 | GET | `/admin/users` | List users |
+| GET | `/admin/posts` | List all posts |
 | PATCH | `/admin/users/{id}/ban` | Ban/unban |
 | DELETE | `/admin/users/{id}` | Delete user |
 | DELETE | `/admin/posts/{id}` | Delete post |

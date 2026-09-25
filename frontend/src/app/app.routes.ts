@@ -29,6 +29,11 @@ export const routes: Routes = [
     loadComponent: () => import('./features/search/user-search-page.component').then(m => m.UserSearchPageComponent)
   },
   {
+    path: 'posts/:id',
+    canActivate: [authGuard],
+    loadComponent: () => import('./features/feed/post-detail/post-detail.component').then(m => m.PostDetailComponent)
+  },
+  {
     path: 'profile/:username',
     canActivate: [authGuard],
     loadComponent: () => import('./features/profile/profile.component').then(m => m.ProfileComponent)

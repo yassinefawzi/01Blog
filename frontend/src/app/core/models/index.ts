@@ -46,6 +46,7 @@ export interface Post {
   likesCount: number;
   commentsCount: number;
   likedByCurrentUser: boolean;
+  hidden?: boolean;
   comments?: Comment[];
 }
 
@@ -82,5 +83,6 @@ export interface AdminStats {
   totalUsers: number;
   totalPosts: number;
   pendingReports: number;
+  reportedUsers: number;
   bannedUsers: number;
 }

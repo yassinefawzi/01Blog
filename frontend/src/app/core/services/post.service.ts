@@ -39,7 +39,7 @@ export class PostService {
     );
   }
 
-  updatePost(id: number, data: { description: string; mediaUrl?: string; mediaType?: string }) {
+  updatePost(id: number, data: { description: string; mediaUrl?: string | null; mediaType?: string }) {
     return this.http.put<Post>(`${environment.apiUrl}/posts/${id}`, data);
   }
 
@@ -68,5 +68,9 @@ export class PostService {
     return this.http.post<import('../models').Comment>(
       `${environment.apiUrl}/posts/${postId}/comments`, { content }
     );
+  }
+
+  deleteComment(postId: number, commentId: number) {
+    return this.http.delete<void>(`${environment.apiUrl}/posts/${postId}/comments/${commentId}`);
   }
 }

@@ -65,6 +65,7 @@ public class EntityMapper {
                 .likesCount(likesCount)
                 .commentsCount(commentsCount)
                 .likedByCurrentUser(liked)
+                .hidden(post.isHidden())
                 .comments(comments)
                 .build();
     }

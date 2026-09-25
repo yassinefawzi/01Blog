@@ -7,58 +7,133 @@
         <div class="avatar placeholder">{{ post.author.username[0] | uppercase }}</div>
       }
       <div class="author-meta">
-        <mat-card-title>{{ post.author.username }}</mat-card-title>
+        <mat-card-title>
+          {{ post.author.username }}
+          @if (post.hidden) {
+            <span class="hidden-chip">Hidden</span>
+          }
+        </mat-card-title>
         <mat-card-subtitle>{{ post.createdAt | date:'MMM d, y · h:mm a' }}</mat-card-subtitle>
       </div>
     </a>
   </mat-card-header>
 
   <mat-card-content>
-    <p class="description">{{ post.description }}</p>
-    @if (post.mediaUrl && post.mediaType === 'IMAGE') {
-      <div class="media-wrap">
-        <img [src]="post.mediaUrl" alt="Post media" class="media" />
+    @if (editing) {
+      <div class="edit-form">
+        <div class="editor-toolbar">
+          <button mat-button type="button" class="btn-pill" [class.active]="!editPreview" (click)="editPreview = false">Write</button>
+          <button mat-button type="button" class="btn-pill" [class.active]="editPreview" (click)="editPreview = true">Preview</button>
+          <span class="md-hint">Markdown supported</span>
+        </div>
+        @if (!editPreview) {
+          <mat-form-field appearance="outline" class="full-width" subscriptSizing="dynamic">
+            <mat-label>Edit post</mat-label>
+            <textarea matInput rows="4" [(ngModel)]="editDescription" maxlength="5000"></textarea>
+          </mat-form-field>
+        } @else {
+          <div class="markdown-body markdown-preview" [innerHTML]="editDescription | markdown"></div>
+        }
+
+        <div class="edit-media">
+          <input type="file" #editFileInput hidden accept="image/*,video/*" (change)="onEditFileSelected($event)" />
+          @if (uploading) {
+            <div class="edit-media-state">
+              <mat-spinner diameter="28"></mat-spinner>
+              <span>Uploading...</span>
+            </div>
+          } @else if (editPreviewUrl && editMediaType === 'IMAGE') {
+            <img [src]="editPreviewUrl" alt="Preview" class="edit-preview" />
+          } @else if (editPreviewUrl && editMediaType === 'VIDEO') {
+            <video [src]="editPreviewUrl" controls class="edit-preview"></video>
+          }
+
+          <div class="edit-media-actions">
+            <button mat-stroked-button type="button" class="btn-pill" (click)="editFileInput.click()">
+              {{ editPreviewUrl ? 'Change media' : 'Add media' }}
+            </button>
+            @if (editPreviewUrl) {
+              <button mat-button type="button" class="btn-pill" (click)="removeEditMedia()">Remove</button>
+            }
+          </div>
+        </div>
+
+        <div class="edit-actions">
+          <button mat-button type="button" class="btn-pill" (click)="cancelEdit()" [disabled]="saving">Cancel</button>
+          <button mat-flat-button color="primary" type="button" class="btn-pill"
+                  (click)="saveEdit()" [disabled]="saving || uploading || !editDescription.trim()">
+            @if (saving) { Saving... } @else { Save }
+          </button>
+        </div>
       </div>
-    }
-    @if (post.mediaUrl && post.mediaType === 'VIDEO') {
-      <div class="media-wrap">
-        <video [src]="post.mediaUrl" controls class="media"></video>
-      </div>
+    } @else {
+      <div class="description markdown-body" [innerHTML]="post.description | markdown"></div>
+      @if (post.mediaUrl && post.mediaType === 'IMAGE') {
+        <div class="media-wrap">
+          <img [src]="post.mediaUrl" alt="Post media" class="media" />
+        </div>
+      }
+      @if (post.mediaUrl && post.mediaType === 'VIDEO') {
+        <div class="media-wrap">
+          <video [src]="post.mediaUrl" controls class="media"></video>
+        </div>
+      }
     }
   </mat-card-content>
 
-  <div class="action-bar">
-    <button mat-button class="action-btn" [class.liked]="post.likedByCurrentUser" (click)="toggleLike()">
-      <mat-icon>{{ post.likedByCurrentUser ? 'favorite' : 'favorite_border' }}</mat-icon>
-      <span>{{ post.likesCount }}</span>
-    </button>
-    <button mat-button class="action-btn" [class.active]="showCommentBox" (click)="showCommentBox = !showCommentBox">
-      <mat-icon>chat_bubble_outline</mat-icon>
-      <span>{{ post.commentsCount }}</span>
-    </button>
-    <span class="action-spacer"></span>
-    <button mat-icon-button class="icon-action" (click)="openReport()" aria-label="Report">
-      <mat-icon>flag</mat-icon>
-    </button>
-    @if (isOwner()) {
-      <button mat-icon-button class="icon-action danger" (click)="deletePost()" aria-label="Delete">
-        <mat-icon>delete_outline</mat-icon>
+  @if (!editing) {
+    <div class="action-bar">
+      <button mat-button class="action-btn" [class.liked]="post.likedByCurrentUser" (click)="toggleLike()">
+        <mat-icon>{{ post.likedByCurrentUser ? 'favorite' : 'favorite_border' }}</mat-icon>
+        <span>{{ post.likesCount }}</span>
       </button>
-    }
-  </div>
+      <button mat-button class="action-btn" [class.active]="showCommentBox" (click)="toggleComments()">
+        <mat-icon>chat_bubble_outline</mat-icon>
+        <span>{{ post.commentsCount }}</span>
+      </button>
+      <span class="action-spacer"></span>
+      <button mat-icon-button class="icon-action" (click)="openReport()" aria-label="Report">
+        <mat-icon>flag</mat-icon>
+      </button>
+      @if (isOwner()) {
+        <button mat-icon-button class="icon-action" (click)="startEdit()" aria-label="Edit">
+          <mat-icon>edit</mat-icon>
+        </button>
+        <button mat-icon-button class="icon-action danger" (click)="deletePost()" aria-label="Delete">
+          <mat-icon>delete_outline</mat-icon>
+        </button>
+      }
+    </div>
+  }
 
-  @if (showComments && showCommentBox) {
+  @if (showComments && showCommentBox && !editing) {
     <div class="comments">
+      @if (commentsLoading) {
+        <p class="no-comments">Loading comments...</p>
+      }
       @for (c of post.comments; track c.id) {
         <div class="comment">
-          <span class="comment-avatar">{{ c.author.username[0] | uppercase }}</span>
+          <a [routerLink]="['/profile', c.author.username]" class="comment-author">
+            @if (c.author.avatarUrl) {
+              <img [src]="c.author.avatarUrl" alt="" class="comment-avatar" />
+            } @else {
+              <span class="comment-avatar placeholder">{{ c.author.username[0] | uppercase }}</span>
+            }
+          </a>
           <div class="comment-body">
-            <strong>{{ c.author.username }}</strong>
+            <a [routerLink]="['/profile', c.author.username]" class="comment-username">{{ c.author.username }}</a>
             <p>{{ c.content }}</p>
           </div>
+          @if (isCommentOwner(c)) {
+            <button mat-icon-button class="icon-action danger comment-delete" (click)="deleteComment(c)" aria-label="Delete comment">
+              <mat-icon>delete_outline</mat-icon>
+            </button>
+          }
         </div>
       } @empty {
-        <p class="no-comments">No comments yet — start the conversation.</p>
+        @if (!commentsLoading) {
+          <p class="no-comments">No comments yet — start the conversation.</p>
+        }
       }
       <div class="comment-form">
         <mat-form-field appearance="outline" class="comment-input" subscriptSizing="dynamic">

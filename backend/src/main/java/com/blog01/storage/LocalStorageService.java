@@ -63,10 +63,16 @@ public class LocalStorageService implements StorageService {
             return;
         }
         String filename = fileUrl.substring(fileUrl.lastIndexOf('/') + 1);
+        if (filename.contains("..") || filename.contains("/") || filename.contains("\\")) {
+            return;
+        }
         try {
-            Files.deleteIfExists(uploadPath.resolve(filename));
+            Path target = uploadPath.resolve(filename).normalize();
+            if (!target.startsWith(uploadPath)) {
+                return;
+            }
+            Files.deleteIfExists(target);
         } catch (IOException ignored) {
-            // best effort
         }
     }
 

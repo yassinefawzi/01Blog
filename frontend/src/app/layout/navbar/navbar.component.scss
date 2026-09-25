@@ -104,10 +104,25 @@
   height: 28px;
   margin-right: 6px;
   border-radius: 50%;
-  background: var(--gradient-brand);
-  color: white;
+  object-fit: cover;
   font-size: 0.75rem;
   font-weight: 700;
+  vertical-align: middle;
+
+  &.placeholder {
+    background: var(--gradient-brand);
+    color: white;
+  }
+
+  &.mobile-avatar {
+    width: 24px;
+    height: 24px;
+    margin: 0;
+  }
+}
+
+.nav-actions a.active {
+  color: var(--color-primary) !important;
 }
 
 .logout-btn {
