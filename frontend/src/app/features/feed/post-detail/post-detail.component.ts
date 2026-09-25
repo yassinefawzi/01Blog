@@ -1,5 +1,5 @@
 import { Component, OnInit, signal } from '@angular/core';
-import { ActivatedRoute, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { PostService } from '../../../core/services/post.service';
 import { Post } from '../../../core/models';
 import { PostCardComponent } from '../../../shared/post-card/post-card.component';
@@ -34,7 +34,6 @@ import { MatIconModule } from '@angular/material/icon';
               <mat-icon>article</mat-icon>
               <h3>Post not found</h3>
               <p>It may have been deleted or hidden.</p>
-              <a mat-flat-button color="primary" routerLink="/feed" class="btn-pill">Go to feed</a>
             </div>
           }
         }
@@ -64,7 +63,11 @@ export class PostDetailComponent implements OnInit {
   post = signal<Post | null>(null);
   loading = signal(true);
 
-  constructor(private route: ActivatedRoute, private postService: PostService) {}
+  constructor(
+    private route: ActivatedRoute,
+    private router: Router,
+    private postService: PostService
+  ) {}
 
   ngOnInit(): void {
     this.route.paramMap.subscribe(params => {
@@ -80,8 +83,8 @@ export class PostDetailComponent implements OnInit {
           this.loading.set(false);
         },
         error: () => {
-          this.post.set(null);
           this.loading.set(false);
+          this.router.navigate(['/error'], { queryParams: { code: '404' } });
         }
       });
     });

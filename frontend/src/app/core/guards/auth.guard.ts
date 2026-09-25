@@ -19,6 +19,7 @@ export const guestGuard: CanActivateFn = () => {
 export const adminGuard: CanActivateFn = () => {
   const auth = inject(AuthService);
   const router = inject(Router);
-  if (auth.isLoggedIn && auth.isAdmin) return true;
-  return router.createUrlTree(['/feed']);
+  if (!auth.isLoggedIn) return router.createUrlTree(['/login']);
+  if (!auth.isAdmin) return router.createUrlTree(['/error'], { queryParams: { code: '403' } });
+  return true;
 };

@@ -43,5 +43,13 @@ export const routes: Routes = [
     canActivate: [adminGuard],
     loadComponent: () => import('./features/admin/admin-dashboard/admin-dashboard.component').then(m => m.AdminDashboardComponent)
   },
-  { path: '**', redirectTo: 'feed' }
+  {
+    path: 'error',
+    loadComponent: () => import('./features/error/error-page.component').then(m => m.ErrorPageComponent)
+  },
+  {
+    path: '**',
+    loadComponent: () => import('./features/error/error-page.component').then(m => m.ErrorPageComponent),
+    data: { code: '404' }
+  }
 ];

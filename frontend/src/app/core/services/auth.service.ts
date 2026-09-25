@@ -39,11 +39,15 @@ export class AuthService {
     );
   }
 
-  logout(queryParams?: Record<string, string>): void {
+  clearSession(): void {
     localStorage.removeItem(this.tokenKey);
     localStorage.removeItem(this.userKey);
     this.currentUser.set(null);
-    this.router.navigate(['/login'], { queryParams });
+  }
+
+  logout(): void {
+    this.clearSession();
+    this.router.navigate(['/login']);
   }
 
   updateCurrentUser(user: User): void {
@@ -59,7 +63,8 @@ export class AuthService {
         const current = this.currentUser();
         if (!current || current.id !== fresh.id) return;
         if (fresh.banned) {
-          this.logout({ banned: '1' });
+          this.clearSession();
+          this.router.navigate(['/error'], { queryParams: { code: 'banned' } });
           return;
         }
         if (current.role === fresh.role && current.banned === fresh.banned) return;

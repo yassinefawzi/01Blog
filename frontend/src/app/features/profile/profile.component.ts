@@ -1,5 +1,5 @@
 import { Component, OnInit, computed, inject, signal } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { UserService } from '../../core/services/user.service';
 import { PostService } from '../../core/services/post.service';
 import { User, Post } from '../../core/models';
@@ -54,6 +54,7 @@ export class ProfileComponent implements OnInit {
 
   constructor(
     private route: ActivatedRoute,
+    private router: Router,
     private userService: UserService,
     private postService: PostService,
     public auth: AuthService,
@@ -80,7 +81,10 @@ export class ProfileComponent implements OnInit {
           this.loading.set(false);
         });
       },
-      error: () => this.loading.set(false)
+      error: () => {
+        this.loading.set(false);
+        this.router.navigate(['/error'], { queryParams: { code: '404' } });
+      }
     });
   }
 
