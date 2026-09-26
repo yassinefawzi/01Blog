@@ -32,7 +32,6 @@ public class FileController {
     @GetMapping("/{filename:.+}")
     public ResponseEntity<Resource> serveFile(@PathVariable String filename) {
         try {
-            // Reject path traversal attempts (e.g. ../)
             if (filename.contains("..") || filename.contains("/") || filename.contains("\\")) {
                 return ResponseEntity.badRequest().build();
             }

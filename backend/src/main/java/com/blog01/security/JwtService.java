@@ -43,6 +43,7 @@ public class JwtService {
         return extractClaim(token, Claims::getExpiration).before(new Date());
     }
 
+	/* */
     private <T> T extractClaim(String token, Function<Claims, T> resolver) {
         Claims claims = Jwts.parser()
                 .verifyWith(getSigningKey())

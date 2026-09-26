@@ -13,6 +13,7 @@ import { RouterLink } from '@angular/router';
 
 @Component({
   selector: 'app-admin-dashboard',
+  //** */
   standalone: true,
   imports: [
     MatCardModule, MatTableModule, MatButtonModule, MatIconModule,
@@ -30,9 +31,9 @@ export class AdminDashboardComponent implements OnInit {
   userColumns = ['username', 'email', 'role', 'actions'];
   postColumns = ['author', 'description', 'status', 'createdAt', 'actions'];
   reportColumns = ['reporter', 'target', 'reason', 'status', 'createdAt', 'actions'];
-
+	//** */
   constructor(private adminService: AdminService, private snackBar: MatSnackBar) {}
-
+	/**/
   ngOnInit(): void {
     this.loadAll();
   }

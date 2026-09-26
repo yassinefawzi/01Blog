@@ -3,8 +3,8 @@ spring:
     name: blog01-backend
   datasource:
     url: jdbc:postgresql://localhost:5434/blog01
-    username: ${DB_USERNAME:blog01}
-    password: ${DB_PASSWORD:blog01_secret}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
     driver-class-name: org.postgresql.Driver
   jpa:
     hibernate:
@@ -26,7 +26,7 @@ server:
 
 app:
   jwt:
-    secret: ${JWT_SECRET:01BlogSuperSecretKeyForJWTTokenGenerationMustBe256BitsLong!!}
+    secret: ${JWT_SECRET}
     expiration-ms: ${JWT_EXPIRATION_MS:86400000}
   cors:
     allowed-origins: ${CORS_ORIGINS:http://localhost:4200}
@@ -34,7 +34,7 @@ app:
     type: ${STORAGE_TYPE:local}
     local:
       upload-dir: ${UPLOAD_DIR:uploads}
-      base-url: ${STORAGE_BASE_URL:http://localhost:8080/api/files}
+      base-url: ${STORAGE_BASE_URL}
 
 logging:
   level:

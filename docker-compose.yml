@@ -1,15 +1,78 @@
 services:
+
   postgres:
     image: postgres:16-alpine
     container_name: blog01-postgres
+
     environment:
       POSTGRES_DB: blog01
       POSTGRES_USER: blog01
       POSTGRES_PASSWORD: blog01_secret
+
     ports:
       - "5434:5432"
+
     volumes:
       - postgres_data:/var/lib/postgresql/data
+
+    networks:
+      - blog01
+
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U blog01 -d blog01"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+
+    container_name: blog01-backend
+
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/blog01
+      SPRING_DATASOURCE_USERNAME: blog01
+      SPRING_DATASOURCE_PASSWORD: blog01_secret
+
+    extra_hosts:
+      - "postgres:10.89.1.2"
+
+    ports:
+      - "8080:8080"
+
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+    networks:
+      - blog01
+
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+
+    container_name: blog01-frontend
+
+    ports:
+      - "4200:4200"
+
+    depends_on:
+      - backend
+
+    networks:
+      - blog01
+
+
+networks:
+  blog01:
+    driver: bridge
+    enable_ipv6: false
+
 
 volumes:
   postgres_data:
