@@ -10,6 +10,7 @@ import { DatePipe, UpperCasePipe } from '@angular/common';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { RouterLink } from '@angular/router';
+import { ConfirmService } from '../../../shared/confirm-dialog/confirm-dialog.component';
 
 @Component({
   selector: 'app-admin-dashboard',
@@ -32,7 +33,11 @@ export class AdminDashboardComponent implements OnInit {
   postColumns = ['author', 'description', 'status', 'createdAt', 'actions'];
   reportColumns = ['reporter', 'target', 'reason', 'status', 'createdAt', 'actions'];
 	//** */
-  constructor(private adminService: AdminService, private snackBar: MatSnackBar) {}
+  constructor(
+    private adminService: AdminService,
+    private snackBar: MatSnackBar,
+    private confirm: ConfirmService
+  ) {}
 	/**/
   ngOnInit(): void {
     this.loadAll();
@@ -46,28 +51,40 @@ export class AdminDashboardComponent implements OnInit {
   }
 
   banUser(user: User): void {
-    if (!confirm(`${user.banned ? 'Unban' : 'Ban'} user ${user.username}?`)) return;
-    this.adminService.banUser(user.id, !user.banned).subscribe(() => {
-      this.snackBar.open('User updated', 'OK', { duration: 2000 });
-      this.loadAll();
+    const action = user.banned ? 'Unban' : 'Ban';
+    this.confirm.ask(`${action} user ${user.username}?`, `${action} user`, action).subscribe(ok => {
+      if (!ok) return;
+      this.adminService.banUser(user.id, !user.banned).subscribe(() => {
+        this.snackBar.open('User updated', 'OK', { duration: 2000 });
+        this.loadAll();
+      });
     });
   }
 
   makeAdmin(user: User): void {
-    if (!confirm(`Make ${user.username} an admin? They will have full platform access.`)) {
-      return;
-    }
-    this.adminService.makeAdmin(user.id).subscribe({
-      next: updated => {
-        this.users.update(list => list.map(u => (u.id === updated.id ? updated : u)));
-        this.snackBar.open(`${updated.username} is now an admin`, 'OK', { duration: 2500 });
-      },
-      error: () => this.snackBar.open('Could not promote user', 'OK', { duration: 2500 })
+    this.confirm.ask(
+      `Make ${user.username} an admin? They will have full platform access.`,
+      'Make admin',
+      'Make admin'
+    ).subscribe(ok => {
+      if (!ok) return;
+      this.adminService.makeAdmin(user.id).subscribe({
+        next: updated => {
+          this.users.update(list => list.map(u => (u.id === updated.id ? updated : u)));
+          this.snackBar.open(`${updated.username} is now an admin`, 'OK', { duration: 2500 });
+        },
+        error: () => this.snackBar.open('Could not promote user', 'OK', { duration: 2500 })
+      });
     });
   }
 
   deleteUser(user: User): void {
-    if (confirm(`Delete user ${user.username}? This removes their posts and activity.`)) {
+    this.confirm.ask(
+      `Delete user ${user.username}? This removes their posts and activity.`,
+      'Delete user',
+      'Delete'
+    ).subscribe(ok => {
+      if (!ok) return;
       this.adminService.deleteUser(user.id).subscribe({
         next: () => {
           this.snackBar.open('User deleted', 'OK', { duration: 2000 });
@@ -75,54 +92,70 @@ export class AdminDashboardComponent implements OnInit {
         },
         error: () => this.snackBar.open('Could not delete user', 'OK', { duration: 3000 })
       });
-    }
-  }
-
-  hidePost(postId: number, hidden: boolean): void {
-    const action = hidden ? 'Hide' : 'Unhide';
-    if (!confirm(`${action} this post?`)) return;
-    this.adminService.hidePost(postId, hidden).subscribe({
-      next: updated => {
-        this.posts.update(list => list.map(p => (p.id === updated.id ? { ...p, ...updated } : p)));
-        this.snackBar.open(hidden ? 'Post hidden' : 'Post visible again', 'OK', { duration: 2000 });
-        this.loadAll();
-      },
-      error: () => this.snackBar.open('Could not update post', 'OK', { duration: 3000 })
     });
   }
 
-  deletePost(postId: number): void {
-    if (confirm('Delete this post permanently?')) {
+  hidePost(postId: number, hidden: boolean, report?: Report): void {
+    const action = hidden ? 'Hide' : 'Unhide';
+    this.confirm.ask(`${action} this post?`, `${action} post`, action).subscribe(ok => {
+      if (!ok) return;
+      this.adminService.hidePost(postId, hidden).subscribe({
+        next: updated => {
+          this.posts.update(list => list.map(p => (p.id === updated.id ? { ...p, ...updated } : p)));
+          this.snackBar.open(hidden ? 'Post hidden' : 'Post visible again', 'OK', { duration: 2000 });
+          this.finishReport(report);
+        },
+        error: () => this.snackBar.open('Could not update post', 'OK', { duration: 3000 })
+      });
+    });
+  }
+
+  deletePost(postId: number, report?: Report): void {
+    this.confirm.ask('Delete this post permanently?', 'Delete post', 'Delete').subscribe(ok => {
+      if (!ok) return;
       this.adminService.deletePost(postId).subscribe({
         next: () => {
           this.snackBar.open('Post deleted', 'OK', { duration: 2000 });
           this.posts.update(list => list.filter(p => p.id !== postId));
-          this.loadAll();
+          this.finishReport(report);
         },
         error: () => this.snackBar.open('Could not delete post', 'OK', { duration: 3000 })
       });
-    }
+    });
   }
 
   resolveReport(report: Report, status: 'RESOLVED' | 'DISMISSED'): void {
-    if (!confirm(`${status === 'RESOLVED' ? 'Resolve' : 'Dismiss'} this report?`)) return;
-    this.adminService.resolveReport(report.id, status).subscribe(() => {
-      this.snackBar.open('Report updated', 'OK', { duration: 2000 });
-      this.loadAll();
+    const label = status === 'RESOLVED' ? 'Resolve' : 'Dismiss';
+    this.confirm.ask(`${label} this report?`, `${label} report`, label).subscribe(ok => {
+      if (!ok) return;
+      this.adminService.resolveReport(report.id, status).subscribe(() => {
+        this.snackBar.open('Report updated', 'OK', { duration: 2000 });
+        this.loadAll();
+      });
     });
   }
 
   banReportedUser(report: Report): void {
     const user = report.reportedUser;
     if (!user) return;
-    if (!confirm(`Ban user ${user.username}?`)) return;
-    this.adminService.banUser(user.id, true).subscribe({
-      next: () => {
-        this.snackBar.open(`${user.username} banned`, 'OK', { duration: 2000 });
-        this.adminService.resolveReport(report.id, 'RESOLVED').subscribe(() => this.loadAll());
-      },
-      error: () => this.snackBar.open('Could not ban user', 'OK', { duration: 3000 })
+    this.confirm.ask(`Ban user ${user.username}?`, 'Ban user', 'Ban').subscribe(ok => {
+      if (!ok) return;
+      this.adminService.banUser(user.id, true).subscribe({
+        next: () => {
+          this.snackBar.open(`${user.username} banned`, 'OK', { duration: 2000 });
+          this.finishReport(report);
+        },
+        error: () => this.snackBar.open('Could not ban user', 'OK', { duration: 3000 })
+      });
     });
+  }
+
+  private finishReport(report?: Report): void {
+    if (!report || report.status !== 'PENDING') {
+      this.loadAll();
+      return;
+    }
+    this.adminService.resolveReport(report.id, 'RESOLVED').subscribe(() => this.loadAll());
   }
 
   truncate(text: string, max = 80): string {

@@ -10,6 +10,7 @@ import { PostService } from '../../../core/services/post.service';
 import { FileService } from '../../../core/services/file.service';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { ConfirmService } from '../../../shared/confirm-dialog/confirm-dialog.component';
 import { MarkdownPipe } from '../../../shared/markdown.pipe';
 
 @Component({
@@ -29,6 +30,7 @@ export class CreatePostComponent {
   private fileService = inject(FileService);
   private router = inject(Router);
   private snackBar = inject(MatSnackBar);
+  private confirm = inject(ConfirmService);
 
   form = this.fb.group({
     description: ['', [Validators.required, Validators.maxLength(5000)]]
@@ -62,7 +64,13 @@ export class CreatePostComponent {
 
   submit(): void {
     if (this.form.invalid) return;
-    if (!confirm('Publish this post?')) return;
+    this.confirm.ask('Publish this post?', 'Publish post', 'Publish').subscribe(ok => {
+      if (!ok) return;
+      this.publish();
+    });
+  }
+
+  private publish(): void {
     this.submitting = true;
     this.postService.createPost({
       description: this.form.value.description!,

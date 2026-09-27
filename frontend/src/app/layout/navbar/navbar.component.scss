@@ -156,9 +156,23 @@
   }
 
   .unread {
-    font-weight: 600;
+    font-weight: 700;
     color: var(--color-text);
   }
+}
+
+.unread-dot {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  margin-right: 8px;
+  border-radius: 50%;
+  background: var(--color-accent);
+  vertical-align: middle;
+}
+
+::ng-deep .notif-menu .notif-item.unread-item {
+  background: var(--color-primary-soft);
 }
 
 .notif-empty {

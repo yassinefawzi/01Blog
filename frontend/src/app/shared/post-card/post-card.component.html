@@ -92,9 +92,11 @@
         <span>{{ post.commentsCount }}</span>
       </button>
       <span class="action-spacer"></span>
-      <button mat-icon-button class="icon-action" (click)="openReport()" aria-label="Report">
-        <mat-icon>flag</mat-icon>
-      </button>
+      @if (!isOwner()) {
+        <button mat-icon-button class="icon-action" (click)="openReport()" aria-label="Report">
+          <mat-icon>flag</mat-icon>
+        </button>
+      }
       @if (isOwner()) {
         <button mat-icon-button class="icon-action" (click)="startEdit()" aria-label="Edit">
           <mat-icon>edit</mat-icon>

@@ -39,7 +39,7 @@ public class ReportService {
         if (request.getReportedUserId() != null) {
             reportedUser = userRepository.findById(request.getReportedUserId())
                     .orElseThrow(() -> new ResourceNotFoundException("User not found"));
-        }
+        }getReportedUserIdgetReportedUserId
         if (request.getReportedPostId() != null) {
             reportedPost = postRepository.findById(request.getReportedPostId())
                     .orElseThrow(() -> new ResourceNotFoundException("Post not found"));

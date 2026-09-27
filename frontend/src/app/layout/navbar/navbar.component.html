@@ -68,9 +68,14 @@
           </div>
           <mat-divider />
           @for (n of notifications.notifications(); track n.id) {
-            <button mat-menu-item (click)="markRead(n)" class="notif-item">
+            <button mat-menu-item (click)="markRead(n)" class="notif-item" [class.unread-item]="!n.read">
               <mat-icon>{{ getNotifIcon(n.type) }}</mat-icon>
-              <span [class.unread]="!n.read">{{ n.message }}</span>
+              <span [class.unread]="!n.read">
+                @if (!n.read) {
+                  <span class="unread-dot" aria-hidden="true"></span>
+                }
+                {{ n.message }}
+              </span>
             </button>
           } @empty {
             <div class="notif-empty">You're all caught up</div>

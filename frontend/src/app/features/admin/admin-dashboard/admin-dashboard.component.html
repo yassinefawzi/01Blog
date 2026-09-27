@@ -67,9 +67,11 @@
                 <button mat-icon-button (click)="banUser(u)" [matTooltip]="u.banned ? 'Unban' : 'Ban'">
                   <mat-icon>{{ u.banned ? 'lock_open' : 'block' }}</mat-icon>
                 </button>
-                <button mat-icon-button class="danger" (click)="deleteUser(u)" matTooltip="Delete user">
-                  <mat-icon>delete_outline</mat-icon>
-                </button>
+                @if (u.role !== 'ADMIN') {
+                  <button mat-icon-button class="danger" (click)="deleteUser(u)" matTooltip="Delete user">
+                    <mat-icon>delete_outline</mat-icon>
+                  </button>
+                }
               </td>
             </ng-container>
             <tr mat-header-row *matHeaderRowDef="userColumns"></tr>
@@ -175,17 +177,16 @@
               <th mat-header-cell *matHeaderCellDef>Actions</th>
               <td mat-cell *matCellDef="let r">
                 @if (r.status === 'PENDING') {
-                  <button mat-stroked-button class="btn-pill sm" (click)="resolveReport(r, 'RESOLVED')">Resolve</button>
                   <button mat-button class="btn-pill sm" (click)="resolveReport(r, 'DISMISSED')">Dismiss</button>
                 }
                 @if (r.reportedPostId) {
                   <button mat-icon-button [routerLink]="['/posts', r.reportedPostId]" matTooltip="View post">
                     <mat-icon>open_in_new</mat-icon>
                   </button>
-                  <button mat-icon-button (click)="hidePost(r.reportedPostId!, true)" matTooltip="Hide post">
+                  <button mat-icon-button (click)="hidePost(r.reportedPostId!, true, r)" matTooltip="Hide post">
                     <mat-icon>visibility_off</mat-icon>
                   </button>
-                  <button mat-icon-button class="danger" (click)="deletePost(r.reportedPostId!)" matTooltip="Delete post">
+                  <button mat-icon-button class="danger" (click)="deletePost(r.reportedPostId!, r)" matTooltip="Delete post">
                     <mat-icon>delete_outline</mat-icon>
                   </button>
                 }

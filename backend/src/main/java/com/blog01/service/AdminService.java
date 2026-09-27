@@ -87,6 +87,9 @@ public class AdminService {
     public void deleteUser(Long id) {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+        if (user.getRole() == Role.ADMIN) {
+            throw new BadRequestException("Admins cannot be deleted");
+        }
 
         // Remove posts owned by the user (and their dependent rows)
         List<Post> posts = postRepository.findByAuthor(user);

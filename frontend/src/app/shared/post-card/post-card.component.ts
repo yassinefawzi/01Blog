@@ -15,6 +15,7 @@ import { MatDialog } from '@angular/material/dialog';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { ReportDialogComponent } from '../report-dialog/report-dialog.component';
+import { ConfirmService } from '../confirm-dialog/confirm-dialog.component';
 import { MarkdownPipe } from '../markdown.pipe';
 
 @Component({
@@ -52,7 +53,8 @@ export class PostCardComponent {
   constructor(
     public auth: AuthService,
     private postService: PostService,
-    private dialog: MatDialog
+    private dialog: MatDialog,
+    private confirm: ConfirmService
   ) {}
 
   toggleLike(): void {
@@ -87,7 +89,13 @@ export class PostCardComponent {
   }
 
   deleteComment(comment: Comment): void {
-    if (!confirm('Delete this comment?')) return;
+    this.confirm.ask('Delete this comment?', 'Delete comment', 'Delete').subscribe(ok => {
+      if (!ok) return;
+      this.removeComment(comment);
+    });
+  }
+
+  private removeComment(comment: Comment): void {
     this.postService.deleteComment(this.post.id, comment.id).subscribe({
       next: () => {
         const comments = (this.post.comments || []).filter(c => c.id !== comment.id);
@@ -168,9 +176,10 @@ export class PostCardComponent {
   }
 
   deletePost(): void {
-    if (confirm('Delete this post?')) {
+    this.confirm.ask('Delete this post?', 'Delete post', 'Delete').subscribe(ok => {
+      if (!ok) return;
       this.postService.deletePost(this.post.id, this.post.author.username).subscribe(() => this.postDeleted.emit(this.post.id));
-    }
+    });
   }
 
   openReport(): void {

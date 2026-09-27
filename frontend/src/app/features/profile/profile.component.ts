@@ -15,6 +15,7 @@ import { ConnectionsBlockComponent } from '../../shared/connections-block/connec
 import { UserStatsService } from '../../core/services/user-stats.service';
 import { UpperCasePipe } from '@angular/common';
 import { RouterLink } from '@angular/router';
+import { ConfirmService } from '../../shared/confirm-dialog/confirm-dialog.component';
 
 @Component({
   selector: 'app-profile',
@@ -58,7 +59,8 @@ export class ProfileComponent implements OnInit {
     private userService: UserService,
     private postService: PostService,
     public auth: AuthService,
-    private dialog: MatDialog
+    private dialog: MatDialog,
+    private confirm: ConfirmService
   ) {}
 
   ngOnInit(): void {
@@ -92,9 +94,11 @@ export class ProfileComponent implements OnInit {
     const u = this.user();
     if (!u) return;
     const action = u.subscribed ? 'Unsubscribe from' : 'Subscribe to';
-    if (!confirm(`${action} ${u.username}?`)) return;
-    this.userService.toggleSubscription(u.username).subscribe(res => {
-      this.user.set({ ...u, subscribed: res.subscribed });
+    this.confirm.ask(`${action} ${u.username}?`, action, action.split(' ')[0]).subscribe(ok => {
+      if (!ok) return;
+      this.userService.toggleSubscription(u.username).subscribe(res => {
+        this.user.set({ ...u, subscribed: res.subscribed });
+      });
     });
   }
 

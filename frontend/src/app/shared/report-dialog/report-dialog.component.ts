@@ -7,6 +7,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { FormsModule } from '@angular/forms';
 import { ReportService } from '../../core/services/report.service';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
+import { ConfirmService } from '../confirm-dialog/confirm-dialog.component';
 
 @Component({
   selector: 'app-report-dialog',
@@ -61,24 +62,25 @@ export class ReportDialogComponent {
     private reportService: ReportService,
     private snackBar: MatSnackBar,
     private dialogRef: MatDialogRef<ReportDialogComponent>,
+    private confirm: ConfirmService,
     @Inject(MAT_DIALOG_DATA) public data: { reportedPostId?: number; reportedUserId?: number }
   ) {}
 
   submit(): void {
     if (!this.reason.trim()) return;
-    if (!confirm('Submit this report? Our moderators will review it.')) {
-      return;
-    }
-    this.reportService.createReport({
-      reason: this.reason.trim(),
-      reportedPostId: this.data.reportedPostId,
-      reportedUserId: this.data.reportedUserId
-    }).subscribe({
-      next: () => {
-        this.snackBar.open('Report submitted — thank you', 'OK', { duration: 3000 });
-        this.dialogRef.close();
-      },
-      error: () => this.snackBar.open('Failed to submit report', 'OK', { duration: 3000 })
+    this.confirm.ask('Submit this report? Our moderators will review it.', 'Submit report', 'Submit').subscribe(ok => {
+      if (!ok) return;
+      this.reportService.createReport({
+        reason: this.reason.trim(),
+        reportedPostId: this.data.reportedPostId,
+        reportedUserId: this.data.reportedUserId
+      }).subscribe({
+        next: () => {
+          this.snackBar.open('Report submitted — thank you', 'OK', { duration: 3000 });
+          this.dialogRef.close();
+        },
+        error: () => this.snackBar.open('Failed to submit report', 'OK', { duration: 3000 })
+      });
     });
   }
 }
