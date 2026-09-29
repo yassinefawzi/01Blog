@@ -14,7 +14,6 @@ import { ConfirmService } from '../../../shared/confirm-dialog/confirm-dialog.co
 
 @Component({
   selector: 'app-admin-dashboard',
-  //** */
   standalone: true,
   imports: [
     MatCardModule, MatTableModule, MatButtonModule, MatIconModule,
@@ -32,13 +31,11 @@ export class AdminDashboardComponent implements OnInit {
   userColumns = ['username', 'email', 'role', 'actions'];
   postColumns = ['author', 'description', 'status', 'createdAt', 'actions'];
   reportColumns = ['reporter', 'target', 'reason', 'status', 'createdAt', 'actions'];
-	//** */
   constructor(
     private adminService: AdminService,
     private snackBar: MatSnackBar,
     private confirm: ConfirmService
   ) {}
-	/**/
   ngOnInit(): void {
     this.loadAll();
   }
