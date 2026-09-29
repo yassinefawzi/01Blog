@@ -222,7 +222,6 @@ export class PostCardComponent {
   }
 
   deletePost(): void {
-    if (this.post.hidden) return;
     this.confirm.ask('Delete this post?', 'Delete post', 'Delete').subscribe(ok => {
       if (!ok) return;
       this.postService.deletePost(this.post.id, this.post.author.username).subscribe(() => this.postDeleted.emit(this.post.id));

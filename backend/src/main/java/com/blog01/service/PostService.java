@@ -114,9 +114,6 @@ public class PostService {
     @Transactional
     public void deletePost(Long id, User currentUser) {
         Post post = findPost(id);
-        if (post.isHidden() && currentUser.getRole() != Role.ADMIN) {
-            throw new BadRequestException("This post is hidden");
-        }
         if (!post.getAuthor().getId().equals(currentUser.getId()) && currentUser.getRole() != Role.ADMIN) {
             throw new ForbiddenException("Not allowed to delete this post");
         }

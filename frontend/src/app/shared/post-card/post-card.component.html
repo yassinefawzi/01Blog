@@ -101,6 +101,8 @@
         <button mat-icon-button class="icon-action" (click)="startEdit()" aria-label="Edit">
           <mat-icon>edit</mat-icon>
         </button>
+      }
+      @if (isOwner()) {
         <button mat-icon-button class="icon-action danger" (click)="deletePost()" aria-label="Delete">
           <mat-icon>delete_outline</mat-icon>
         </button>
