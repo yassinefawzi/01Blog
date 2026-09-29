@@ -175,4 +175,3 @@ blog01/
 
 - Infinite scroll on feed
 - Admin analytics dashboard
-- S3-ready storage abstraction (`StorageService` interface)
