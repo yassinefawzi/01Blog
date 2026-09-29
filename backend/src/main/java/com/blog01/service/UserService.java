@@ -46,7 +46,7 @@ public class UserService {
         if (currentUser.getAvatarUrl() != null) {
             storageService.delete(currentUser.getAvatarUrl());
         }
-        String url = storageService.store(file);
+        String url = storageService.storeImage(file).url();
         currentUser.setAvatarUrl(url);
         User saved = userRepository.save(currentUser);
         return mapper.toUserResponse(saved, saved);

@@ -16,19 +16,23 @@ import { UserStatsService } from '../../core/services/user-stats.service';
 import { UpperCasePipe } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { ConfirmService } from '../../shared/confirm-dialog/confirm-dialog.component';
+import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
+import { AVATAR_MESSAGE, detectAllowedMedia, mediaRejectionMessage } from '../../core/services/file.service';
 
 @Component({
   selector: 'app-profile',
   standalone: true,
   imports: [
     PostCardComponent, MatButtonModule, MatIconModule,
-    MatProgressSpinnerModule, UpperCasePipe, RouterLink, ConnectionsBlockComponent
+    MatProgressSpinnerModule, UpperCasePipe, RouterLink, ConnectionsBlockComponent,
+    MatSnackBarModule
   ],
   templateUrl: './profile.component.html',
   styleUrl: './profile.component.scss'
 })
 export class ProfileComponent implements OnInit {
   private userStats = inject(UserStatsService);
+  private snackBar = inject(MatSnackBar);
 
   user = signal<User | null>(null);
   posts = signal<Post[]>([]);
@@ -120,12 +124,26 @@ export class ProfileComponent implements OnInit {
     }
   }
 
-  onAvatarChange(event: Event): void {
-    const file = (event.target as HTMLInputElement).files?.[0];
+  async onAvatarChange(event: Event): Promise<void> {
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0];
+    input.value = '';
     if (!file) return;
-    this.userService.uploadAvatar(file).subscribe(user => {
-      this.user.set(user);
-      this.auth.updateCurrentUser(user);
+    try {
+      if (!await detectAllowedMedia(file, true)) {
+        this.snackBar.open(AVATAR_MESSAGE, 'OK', { duration: 4000 });
+        return;
+      }
+    } catch (err) {
+      this.snackBar.open(mediaRejectionMessage(err, AVATAR_MESSAGE) ?? AVATAR_MESSAGE, 'OK', { duration: 4000 });
+      return;
+    }
+    this.userService.uploadAvatar(file).subscribe({
+      next: user => {
+        this.user.set(user);
+        this.auth.updateCurrentUser(user);
+      },
+      error: err => this.snackBar.open(mediaRejectionMessage(err, AVATAR_MESSAGE) ?? AVATAR_MESSAGE, 'OK', { duration: 4000 })
     });
   }
 

@@ -5,6 +5,7 @@ import com.blog01.dto.response.CommentResponse;
 import com.blog01.entity.Comment;
 import com.blog01.entity.Post;
 import com.blog01.entity.User;
+import com.blog01.exception.BadRequestException;
 import com.blog01.exception.ResourceNotFoundException;
 import com.blog01.mapper.EntityMapper;
 import com.blog01.repository.CommentRepository;
@@ -36,6 +37,9 @@ public class CommentService {
     public CommentResponse addComment(Long postId, User currentUser, CommentRequest request) {
         Post post = postRepository.findById(postId)
                 .orElseThrow(() -> new ResourceNotFoundException("Post not found"));
+        if (post.isHidden()) {
+            throw new BadRequestException("This post is hidden");
+        }
 
         Comment comment = Comment.builder()
                 .post(post)
@@ -53,6 +57,9 @@ public class CommentService {
     public void deleteComment(Long commentId, User currentUser) {
         Comment comment = commentRepository.findById(commentId)
                 .orElseThrow(() -> new ResourceNotFoundException("Comment not found"));
+        if (comment.getPost().isHidden()) {
+            throw new BadRequestException("This post is hidden");
+        }
         if (!comment.getAuthor().getId().equals(currentUser.getId())
                 && currentUser.getRole() != com.blog01.entity.Role.ADMIN) {
             throw new com.blog01.exception.ForbiddenException("Not allowed to delete this comment");

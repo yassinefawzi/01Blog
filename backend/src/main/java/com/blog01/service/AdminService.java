@@ -68,6 +68,9 @@ public class AdminService {
     public UserResponse banUser(Long id, boolean banned) {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+        if (user.getRole() == Role.ADMIN) {
+            throw new BadRequestException("Admins cannot be banned");
+        }
         user.setBanned(banned);
         return mapper.toUserResponse(userRepository.save(user), null);
     }

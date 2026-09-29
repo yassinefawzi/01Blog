@@ -1,5 +1,6 @@
 package com.blog01.dto.response;
 
+import com.blog01.entity.Role;
 import lombok.Builder;
 import lombok.Data;
 
@@ -9,4 +10,5 @@ public class UserSummary {
     private Long id;
     private String username;
     private String avatarUrl;
+    private Role role;
 }

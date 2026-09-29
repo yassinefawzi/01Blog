@@ -1,5 +1,7 @@
 import { Component, EventEmitter, Input, Output, inject } from '@angular/core';
 import { RouterLink } from '@angular/router';
+import { Observable, from, of, throwError } from 'rxjs';
+import { switchMap } from 'rxjs/operators';
 import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
@@ -10,7 +12,7 @@ import { DatePipe, UpperCasePipe } from '@angular/common';
 import { Comment, Post } from '../../core/models';
 import { AuthService } from '../../core/services/auth.service';
 import { PostService } from '../../core/services/post.service';
-import { FileService } from '../../core/services/file.service';
+import { detectAllowedMedia, FileService, mediaRejectionMessage, POST_MEDIA_MESSAGE } from '../../core/services/file.service';
 import { MatDialog } from '@angular/material/dialog';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
@@ -48,6 +50,7 @@ export class PostCardComponent {
   editPreviewUrl?: string;
   saving = false;
   uploading = false;
+  private editFile?: File;
   editPreview = false;
 
   constructor(
@@ -58,6 +61,7 @@ export class PostCardComponent {
   ) {}
 
   toggleLike(): void {
+    if (this.post.hidden) return;
     this.postService.toggleLike(this.post.id).subscribe(res => {
       this.post = { ...this.post, likedByCurrentUser: res.liked, likesCount: res.likesCount };
       this.postUpdated.emit(this.post);
@@ -65,6 +69,7 @@ export class PostCardComponent {
   }
 
   toggleComments(): void {
+    if (this.post.hidden) return;
     this.showCommentBox = !this.showCommentBox;
     if (!this.showCommentBox) return;
     this.commentsLoading = true;
@@ -79,7 +84,7 @@ export class PostCardComponent {
   }
 
   submitComment(): void {
-    if (!this.commentText.trim()) return;
+    if (this.post.hidden || !this.commentText.trim()) return;
     this.postService.addComment(this.post.id, this.commentText.trim()).subscribe(comment => {
       const comments = [...(this.post.comments || []), comment];
       this.post = { ...this.post, comments, commentsCount: this.post.commentsCount + 1 };
@@ -89,6 +94,7 @@ export class PostCardComponent {
   }
 
   deleteComment(comment: Comment): void {
+    if (this.post.hidden) return;
     this.confirm.ask('Delete this comment?', 'Delete comment', 'Delete').subscribe(ok => {
       if (!ok) return;
       this.removeComment(comment);
@@ -111,71 +117,112 @@ export class PostCardComponent {
   }
 
   startEdit(): void {
+    if (this.post.hidden) return;
     this.editing = true;
     this.editDescription = this.post.description;
     this.editMediaUrl = this.post.mediaUrl;
     this.editMediaType = this.post.mediaType || 'NONE';
     this.editPreviewUrl = this.post.mediaUrl;
+    this.editFile = undefined;
     this.editPreview = false;
   }
 
   cancelEdit(): void {
+    this.revokeEditPreview();
     this.editing = false;
     this.editDescription = '';
     this.editPreview = false;
     this.editPreviewUrl = undefined;
+    this.editFile = undefined;
     this.uploading = false;
   }
 
-  onEditFileSelected(event: Event): void {
+  async onEditFileSelected(event: Event): Promise<void> {
     const input = event.target as HTMLInputElement;
     const file = input.files?.[0];
+    input.value = '';
     if (!file) return;
+    let kind;
+    try {
+      kind = await detectAllowedMedia(file, false);
+    } catch (err) {
+      this.snackBar.open(mediaRejectionMessage(err, POST_MEDIA_MESSAGE) ?? POST_MEDIA_MESSAGE, 'OK', { duration: 4000 });
+      return;
+    }
+    if (!kind) {
+      this.snackBar.open(POST_MEDIA_MESSAGE, 'OK', { duration: 4000 });
+      return;
+    }
 
+    this.revokeEditPreview();
+    this.editFile = file;
+    this.editMediaType = kind;
     this.editPreviewUrl = URL.createObjectURL(file);
-    this.uploading = true;
-    this.fileService.upload(file).subscribe({
-      next: res => {
-        this.editMediaUrl = res.url;
-        this.editMediaType = res.mediaType;
-        this.uploading = false;
-      },
-      error: () => {
-        this.uploading = false;
-        this.snackBar.open('Upload failed', 'OK', { duration: 3000 });
-      }
-    });
   }
 
   removeEditMedia(): void {
+    this.revokeEditPreview();
+    this.editFile = undefined;
     this.editMediaUrl = undefined;
     this.editMediaType = 'NONE';
     this.editPreviewUrl = undefined;
   }
 
+  private uploadOnSave(file: File): Observable<{ url: string; mediaType: string }> {
+    return from(detectAllowedMedia(file, false)).pipe(
+      switchMap(kind => {
+        if (!kind) {
+          return throwError(() => new Error('invalid-media')) as Observable<{ url: string; mediaType: string }>;
+        }
+        this.uploading = true;
+        return this.fileService.upload(file);
+      })
+    );
+  }
+
+  private revokeEditPreview(): void {
+    if (this.editPreviewUrl?.startsWith('blob:')) {
+      URL.revokeObjectURL(this.editPreviewUrl);
+    }
+  }
+
   saveEdit(): void {
     if (!this.editDescription.trim()) return;
     this.saving = true;
-    this.postService.updatePost(this.post.id, {
-      description: this.editDescription.trim(),
-      mediaUrl: this.editMediaUrl ?? null,
-      mediaType: this.editMediaType
-    }).subscribe({
+    const description = this.editDescription.trim();
+    const file = this.editFile;
+
+    const uploaded$: Observable<{ url: string; mediaType: string } | null> = file
+      ? this.uploadOnSave(file)
+      : of(null);
+
+    uploaded$.pipe(
+      switchMap(uploaded => this.postService.updatePost(this.post.id, {
+        description,
+        mediaUrl: uploaded ? uploaded.url : (this.editMediaUrl ?? null),
+        mediaType: uploaded ? uploaded.mediaType : this.editMediaType
+      }))
+    ).subscribe({
       next: updated => {
+        this.revokeEditPreview();
+        this.editFile = undefined;
+        this.uploading = false;
         this.post = { ...this.post, ...updated };
         this.editing = false;
         this.saving = false;
         this.postUpdated.emit(this.post);
         this.snackBar.open('Post updated', 'OK', { duration: 2000 });
       },
-      error: () => {
+      error: (err: unknown) => {
+        this.uploading = false;
         this.saving = false;
-        this.snackBar.open('Failed to update post', 'OK', { duration: 3000 });
+        this.snackBar.open(mediaRejectionMessage(err, POST_MEDIA_MESSAGE) ?? 'Failed to update post', 'OK', { duration: 4000 });
       }
     });
   }
 
   deletePost(): void {
+    if (this.post.hidden) return;
     this.confirm.ask('Delete this post?', 'Delete post', 'Delete').subscribe(ok => {
       if (!ok) return;
       this.postService.deletePost(this.post.id, this.post.author.username).subscribe(() => this.postDeleted.emit(this.post.id));
@@ -183,6 +230,7 @@ export class PostCardComponent {
   }
 
   openReport(): void {
+    if (this.post.hidden) return;
     this.dialog.open(ReportDialogComponent, {
       width: '400px',
       data: { reportedPostId: this.post.id }

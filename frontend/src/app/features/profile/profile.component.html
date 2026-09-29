@@ -14,7 +14,7 @@
                 <div class="avatar placeholder">{{ u.username[0] | uppercase }}</div>
               }
               @if (u.ownProfile) {
-                <input type="file" #avatarInput hidden accept="image/*" (change)="onAvatarChange($event)" />
+                <input type="file" #avatarInput hidden accept="image/jpeg,image/png,image/gif,image/webp" (change)="onAvatarChange($event)" />
                 <button mat-mini-fab color="primary" (click)="avatarInput.click()" class="avatar-edit" aria-label="Change avatar">
                   <mat-icon>photo_camera</mat-icon>
                 </button>

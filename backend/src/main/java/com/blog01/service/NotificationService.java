@@ -85,18 +85,6 @@ public class NotificationService {
         }
     }
 
-    public void notifyPostAuthorOfLike(Post post, User liker) {
-        if (!post.getAuthor().getId().equals(liker.getId())) {
-            createNotification(
-                    post.getAuthor(),
-                    liker.getUsername() + " liked your post",
-                    NotificationType.NEW_LIKE,
-                    post.getId(),
-                    liker.getId()
-            );
-        }
-    }
-
     public void createNotification(User recipient, String message, NotificationType type,
                                    Long postId, Long userId) {
         Notification notification = Notification.builder()

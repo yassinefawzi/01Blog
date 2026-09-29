@@ -1,7 +1,7 @@
 package com.blog01.service;
 
-import com.blog01.entity.MediaType;
 import com.blog01.storage.StorageService;
+import com.blog01.storage.StoredFile;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -15,15 +15,7 @@ public class FileUploadService {
     private final StorageService storageService;
 
     public Map<String, String> uploadMedia(MultipartFile file) {
-        String url = storageService.store(file);
-        MediaType mediaType = detectMediaType(file.getContentType());
-        return Map.of("url", url, "mediaType", mediaType.name());
-    }
-
-    private MediaType detectMediaType(String contentType) {
-        if (contentType == null) return MediaType.NONE;
-        if (contentType.startsWith("image/")) return MediaType.IMAGE;
-        if (contentType.startsWith("video/")) return MediaType.VIDEO;
-        return MediaType.NONE;
+        StoredFile stored = storageService.store(file);
+        return Map.of("url", stored.url(), "mediaType", stored.kind().name());
     }
 }

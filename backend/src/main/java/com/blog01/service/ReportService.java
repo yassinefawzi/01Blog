@@ -43,6 +43,9 @@ public class ReportService {
         if (request.getReportedPostId() != null) {
             reportedPost = postRepository.findById(request.getReportedPostId())
                     .orElseThrow(() -> new ResourceNotFoundException("Post not found"));
+            if (reportedPost.isHidden()) {
+                throw new BadRequestException("This post is hidden");
+            }
         }
 
         Report report = Report.builder()

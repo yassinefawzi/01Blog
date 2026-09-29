@@ -23,7 +23,7 @@
           }
 
           <div class="upload-zone" (click)="fileInput.click()" [class.has-file]="previewUrl">
-            <input type="file" #fileInput hidden accept="image/*,video/*" (change)="onFileSelected($event)" />
+            <input type="file" #fileInput hidden accept="image/jpeg,image/png,image/gif,image/webp,video/mp4,video/webm" (change)="onFileSelected($event)" />
             @if (uploading) {
               <mat-spinner diameter="32"></mat-spinner>
               <span>Uploading...</span>
@@ -39,7 +39,7 @@
             } @else {
               <mat-icon>cloud_upload</mat-icon>
               <strong>Add photo or video</strong>
-              <span>Click to browse · JPG, PNG, MP4</span>
+              <span>JPG, PNG, GIF, WebP, MP4, or WebM · 50MB max</span>
             }
           </div>
 

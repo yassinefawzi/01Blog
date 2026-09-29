@@ -7,6 +7,7 @@ export interface UserSummary {
   id: number;
   username: string;
   avatarUrl?: string;
+  role?: Role;
 }
 
 export interface User {

@@ -36,7 +36,7 @@
         }
 
         <div class="edit-media">
-          <input type="file" #editFileInput hidden accept="image/*,video/*" (change)="onEditFileSelected($event)" />
+          <input type="file" #editFileInput hidden accept="image/jpeg,image/png,image/gif,image/webp,video/mp4,video/webm" (change)="onEditFileSelected($event)" />
           @if (uploading) {
             <div class="edit-media-state">
               <mat-spinner diameter="28"></mat-spinner>
@@ -83,21 +83,21 @@
 
   @if (!editing) {
     <div class="action-bar">
-      <button mat-button class="action-btn" [class.liked]="post.likedByCurrentUser" (click)="toggleLike()">
+      <button mat-button class="action-btn" [class.liked]="post.likedByCurrentUser" (click)="toggleLike()" [disabled]="post.hidden">
         <mat-icon>{{ post.likedByCurrentUser ? 'favorite' : 'favorite_border' }}</mat-icon>
         <span>{{ post.likesCount }}</span>
       </button>
-      <button mat-button class="action-btn" [class.active]="showCommentBox" (click)="toggleComments()">
+      <button mat-button class="action-btn" [class.active]="showCommentBox" (click)="toggleComments()" [disabled]="post.hidden">
         <mat-icon>chat_bubble_outline</mat-icon>
         <span>{{ post.commentsCount }}</span>
       </button>
       <span class="action-spacer"></span>
-      @if (!isOwner()) {
+      @if (!isOwner() && !post.hidden) {
         <button mat-icon-button class="icon-action" (click)="openReport()" aria-label="Report">
           <mat-icon>flag</mat-icon>
         </button>
       }
-      @if (isOwner()) {
+      @if (isOwner() && !post.hidden) {
         <button mat-icon-button class="icon-action" (click)="startEdit()" aria-label="Edit">
           <mat-icon>edit</mat-icon>
         </button>
@@ -108,7 +108,7 @@
     </div>
   }
 
-  @if (showComments && showCommentBox && !editing) {
+  @if (showComments && showCommentBox && !editing && !post.hidden) {
     <div class="comments">
       @if (commentsLoading) {
         <p class="no-comments">Loading comments...</p>

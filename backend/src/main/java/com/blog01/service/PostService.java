@@ -5,10 +5,13 @@ import com.blog01.dto.response.CommentResponse;
 import com.blog01.dto.response.PageResponse;
 import com.blog01.dto.response.PostResponse;
 import com.blog01.entity.*;
+import com.blog01.exception.BadRequestException;
 import com.blog01.exception.ForbiddenException;
 import com.blog01.exception.ResourceNotFoundException;
 import com.blog01.mapper.EntityMapper;
 import com.blog01.repository.*;
+import com.blog01.storage.StorageService;
+import com.blog01.storage.StoredFileKind;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -31,6 +34,7 @@ public class PostService {
     private final SubscriptionRepository subscriptionRepository;
     private final NotificationService notificationService;
     private final EntityMapper mapper;
+    private final StorageService storageService;
 
     public PageResponse<PostResponse> getFeed(User currentUser, int page, int size) {
         List<Long> followingIds = subscriptionRepository.findFollowingIdByFollowerId(currentUser.getId());
@@ -76,9 +80,9 @@ public class PostService {
         Post post = Post.builder()
                 .author(currentUser)
                 .description(request.getDescription())
-                .mediaUrl(request.getMediaUrl())
-                .mediaType(request.getMediaType() != null ? request.getMediaType() : MediaType.NONE)
+                .mediaType(MediaType.NONE)
                 .build();
+        applyMedia(post, request.getMediaUrl());
         post = postRepository.save(post);
 
         notificationService.notifyFollowersOfNewPost(currentUser, post);
@@ -90,9 +94,11 @@ public class PostService {
     public PostResponse updatePost(Long id, User currentUser, PostRequest request) {
         Post post = findPost(id);
         assertOwner(post, currentUser);
+        if (post.isHidden()) {
+            throw new BadRequestException("This post is hidden");
+        }
         post.setDescription(request.getDescription());
-        post.setMediaUrl(request.getMediaUrl());
-        post.setMediaType(request.getMediaType() != null ? request.getMediaType() : MediaType.NONE);
+        applyMedia(post, request.getMediaUrl());
         post = postRepository.save(post);
         return toPostResponse(post, currentUser, true);
     }
@@ -108,6 +114,9 @@ public class PostService {
     @Transactional
     public void deletePost(Long id, User currentUser) {
         Post post = findPost(id);
+        if (post.isHidden() && currentUser.getRole() != Role.ADMIN) {
+            throw new BadRequestException("This post is hidden");
+        }
         if (!post.getAuthor().getId().equals(currentUser.getId()) && currentUser.getRole() != Role.ADMIN) {
             throw new ForbiddenException("Not allowed to delete this post");
         }
@@ -116,6 +125,17 @@ public class PostService {
         reportRepository.deleteByReportedPost(post);
         notificationRepository.deleteByRelatedPostId(post.getId());
         postRepository.delete(post);
+    }
+
+    private void applyMedia(Post post, String mediaUrl) {
+        if (mediaUrl == null || mediaUrl.isBlank()) {
+            post.setMediaUrl(null);
+            post.setMediaType(MediaType.NONE);
+            return;
+        }
+        StoredFileKind kind = storageService.requireStoredFile(mediaUrl);
+        post.setMediaUrl(mediaUrl);
+        post.setMediaType(kind == StoredFileKind.VIDEO ? MediaType.VIDEO : MediaType.IMAGE);
     }
 
     private Post findPost(Long id) {

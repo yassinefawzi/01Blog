@@ -20,6 +20,7 @@ public class EntityMapper {
                 .id(user.getId())
                 .username(user.getUsername())
                 .avatarUrl(user.getAvatarUrl())
+                .role(user.getRole())
                 .build();
     }
 
