@@ -1,5 +1,4 @@
 services:
-
   postgres:
     image: postgres:16-alpine
     container_name: blog01-postgres
@@ -24,7 +23,6 @@ services:
       timeout: 5s
       retries: 10
 
-
   backend:
     build:
       context: ./backend
@@ -37,8 +35,13 @@ services:
       SPRING_DATASOURCE_USERNAME: blog01
       SPRING_DATASOURCE_PASSWORD: blog01_secret
 
-    extra_hosts:
-      - "postgres:10.89.1.2"
+      JWT_SECRET: ${JWT_SECRET}
+      JWT_EXPIRATION_MS: ${JWT_EXPIRATION_MS:-86400000}
+
+      STORAGE_BASE_URL: ${STORAGE_BASE_URL:-http://localhost:8080/api/files}
+      STORAGE_TYPE: ${STORAGE_TYPE:-local}
+      UPLOAD_DIR: ${UPLOAD_DIR:-uploads}
+      CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost:4200}
 
     ports:
       - "8080:8080"
@@ -49,7 +52,6 @@ services:
 
     networks:
       - blog01
-
 
   frontend:
     build:
@@ -67,12 +69,10 @@ services:
     networks:
       - blog01
 
-
 networks:
   blog01:
     driver: bridge
     enable_ipv6: false
-
 
 volumes:
   postgres_data:
